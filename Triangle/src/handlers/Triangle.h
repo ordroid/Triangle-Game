@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Handle.h"
+#include "Handler.h"
 
 #include "VertexBuffer.h"
 #include "VertexBufferLayout.h"
@@ -11,8 +11,8 @@
 #define ENEMIES 100
 
 
-namespace handle {
-	class Triangle : public Handle
+namespace handler {
+	class Triangle : public Handler
 	{
 	public:
 		Triangle();
@@ -35,6 +35,17 @@ namespace handle {
 		glm::vec3 m_Translation;
 		glm::mat4 m_MVP;
 
+		std::unique_ptr<VertexArray> m_bg_VAO;
+		std::unique_ptr<VertexBuffer> m_bg_VertexBuffer;
+		std::unique_ptr<IndexBuffer> m_bg_IndexBuffer;
+		std::unique_ptr<Shader> m_bg_Shader;
+		std::unique_ptr<Texture> m_bg_Texture;
+
+		glm::mat4 m_bg_Proj;
+		glm::mat4 m_bg_View;
+		glm::vec3 m_bg_Translation;
+		glm::mat4 m_bg_MVP;
+
 		float m_Rotation;
 		
 		friend class Bullet;
@@ -47,17 +58,17 @@ namespace handle {
 	
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	class Bullet : public Handle
+	class Bullet : public Handler
 	{
 	public:
-		Bullet(Triangle* handle, float init_rotation = 0);
+		Bullet(Triangle* handler, float init_rotation = 0);
 		~Bullet();
 
 		void OnUpdate(float deltaTime) override;
 		void OnRender() override;
 
 	private:
-		Triangle* handle;
+		Triangle* handler;
 
 		std::unique_ptr<VertexArray> m_VAO;
 		std::unique_ptr<VertexBuffer> m_VertexBuffer;
@@ -71,7 +82,7 @@ namespace handle {
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	class Enemy : public Handle
+	class Enemy : public Handler
 	{
 	public:
 		Enemy(long long speed);
@@ -81,8 +92,6 @@ namespace handle {
 		void OnRender() override;
 
 	private:
-		Triangle* handle;
-
 		std::unique_ptr<VertexArray> m_VAO;
 		std::unique_ptr<VertexBuffer> m_VertexBuffer;
 		std::unique_ptr<IndexBuffer> m_IndexBuffer;
@@ -97,5 +106,30 @@ namespace handle {
 		float degrees;
 
 		long long speed;
+	};
+
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	class Levelup : public Handler
+	{
+	public:
+		Levelup();
+		~Levelup();
+
+		void OnUpdate(float deltaTime) override;
+		void OnRender() override;
+
+	private:
+		Triangle* handler;
+
+		std::unique_ptr<VertexArray> m_VAO;
+		std::unique_ptr<VertexBuffer> m_VertexBuffer;
+		std::unique_ptr<IndexBuffer> m_IndexBuffer;
+		std::unique_ptr<Shader> m_Shader;
+		std::unique_ptr<Texture> m_Texture;
+
+		glm::mat4 m_Proj;
+		glm::mat4 m_View;
+		glm::vec3 m_Translation;
 	};
 }

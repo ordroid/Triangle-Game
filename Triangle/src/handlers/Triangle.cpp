@@ -6,12 +6,49 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
-namespace handle {
+namespace handler {
 
     Triangle::Triangle() : m_Proj(glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f)),
-                                   m_View(glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0))),
-                                   m_Translation(460, 260, 0), m_Rotation(0.0f)
+                           m_View(glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0))),
+                           m_Translation(460, 260, 0), m_Rotation(0.0f),
+                           m_bg_Proj(glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f)),
+                           m_bg_View(glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0))),
+                           m_bg_Translation(460, 260, 0)
     {
+
+        float bg_positions[] = {
+            -460.0f, -260.0f, 0.0f, 0.0f,  // 0
+             500.0f, -260.0f, 1.0f, 0.0f,  // 1
+             500.0f,  280.0f, 1.0f, 1.0f,  // 2
+            -460.0f,  280.0f, 0.0f, 1.0f   // 3
+        };
+
+        unsigned int bg_indices[] = {
+            0, 1, 2,
+            2, 3, 0
+        };
+
+        GLCall(glEnable(GL_BLEND));
+        GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+
+        m_bg_VAO = std::make_unique<VertexArray>();
+
+        m_bg_VertexBuffer = std::make_unique<VertexBuffer>(bg_positions, 4 * 4 * sizeof(float));
+        VertexBufferLayout bg_layout;
+        bg_layout.Push<float>(2);
+        bg_layout.Push<float>(2);
+
+        m_bg_VAO->AddBuffer(*m_bg_VertexBuffer, bg_layout);
+        m_bg_IndexBuffer = std::make_unique<IndexBuffer>(bg_indices, 6);
+
+        m_bg_Shader = std::make_unique<Shader>("res/shaders/Basic.shader");
+        m_bg_Shader->Bind();
+
+        m_bg_Texture = std::make_unique<Texture>("res/textures/Background.png");
+        m_bg_Shader->SetUniform1i("u_Texture", 0);
+
+
+
         float positions[] = {
             -50.0f, -50.0f,        0.0f, 0.0f,          // 0
              50.0f, -50.0f,        1.0f, 0.0f,          // 1
@@ -58,6 +95,22 @@ namespace handle {
         GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
         GLCall(glClear(GL_COLOR_BUFFER_BIT));
 
+        Renderer bg_renderer;
+
+        m_bg_Texture->Bind();
+
+        {
+            glm::mat4 bg_model = glm::translate(glm::mat4(1.0f), glm::vec3(460, 260, 0));
+            glm::mat4 bg_mvp = m_bg_Proj * m_bg_View * bg_model;
+            m_bg_Shader->Bind();
+            m_bg_Shader->SetUniformMat4f("u_MVP", bg_mvp);
+            bg_renderer.Draw(*m_bg_VAO, *m_bg_IndexBuffer, *m_bg_Shader);
+        }
+
+
+
+
+
         Renderer renderer;
 
         m_Texture->Bind();
@@ -99,9 +152,9 @@ namespace handle {
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    Bullet::Bullet(Triangle* handle, float init_rotation) : handle(handle), saved_rotation(init_rotation + 0.0f)
+    Bullet::Bullet(Triangle* handler, float init_rotation) : handler(handler), saved_rotation(init_rotation + 0.0f)
     {
-        m_BulletTranslation = handle->m_Translation;
+        m_BulletTranslation = handler->m_Translation;
 
         float positions[] = {
             -20.0f, -20.0f, 0.0f, 0.0f,  // 0
@@ -150,7 +203,7 @@ namespace handle {
             model = glm::translate(model, glm::vec3(0.0f, -22.0f, 0.0f));
             model = glm::rotate(model, glm::radians(saved_rotation), glm::vec3(0, 0, -1));
             model = glm::translate(model, glm::vec3(0.0f, 22.0f, 0.0f));
-            glm::mat4 mvp = handle->m_Proj * handle->m_View * model;
+            glm::mat4 mvp = handler->m_Proj * handler->m_View * model;
             m_Shader->Bind();
             m_Shader->SetUniformMat4f("u_MVP", mvp);
             renderer.Draw(*m_VAO, *m_IndexBuffer, *m_Shader);
@@ -162,14 +215,14 @@ namespace handle {
         Renderer renderer;
 
         m_Texture->Bind();
-        m_BulletTranslation = handle->m_Translation;
-        saved_rotation += handle->m_Rotation;
+        m_BulletTranslation = handler->m_Translation;
+        saved_rotation += handler->m_Rotation;
         {
             glm::mat4 model = glm::translate(glm::mat4(1.0f), m_BulletTranslation);
             model = glm::translate(model, glm::vec3(0.0f, -22.0f, 0.0f));
-            model = glm::rotate(model, glm::radians(handle->m_Rotation), glm::vec3(0, 0, -1));
+            model = glm::rotate(model, glm::radians(handler->m_Rotation), glm::vec3(0, 0, -1));
             model = glm::translate(model, glm::vec3(0.0f, 22.0f, 0.0f));
-            glm::mat4 mvp = handle->m_Proj * handle->m_View * model;
+            glm::mat4 mvp = handler->m_Proj * handler->m_View * model;
             m_Shader->Bind();
             m_Shader->SetUniformMat4f("u_MVP", mvp);
             renderer.Draw(*m_VAO, *m_IndexBuffer, *m_Shader);
@@ -254,5 +307,75 @@ namespace handle {
             renderer.Draw(*m_VAO, *m_IndexBuffer, *m_Shader);
         }
 
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    Levelup::Levelup() : m_Proj(glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f)),
+                         m_View(glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0))),
+                         m_Translation(0, 0, 0)
+    {
+        float positions[] = {
+             430.0f, 240.0f, 0.0f, 0.0f,  // 0
+             530.0f, 240.0f, 1.0f, 0.0f,  // 1
+             530.0f, 300.0f, 1.0f, 1.0f,  // 2
+             430.0f, 300.0f, 0.0f, 1.0f   // 3
+        };
+
+        unsigned int indices[] = {
+            0, 1, 2,
+            2, 3, 0
+        };
+
+        GLCall(glEnable(GL_BLEND));
+        GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+
+        m_VAO = std::make_unique<VertexArray>();
+
+        m_VertexBuffer = std::make_unique<VertexBuffer>(positions, 4 * 4 * sizeof(float));
+        VertexBufferLayout layout;
+        layout.Push<float>(2);
+        layout.Push<float>(2);
+
+        m_VAO->AddBuffer(*m_VertexBuffer, layout);
+        m_IndexBuffer = std::make_unique<IndexBuffer>(indices, 6);
+
+        m_Shader = std::make_unique<Shader>("res/shaders/Basic.shader");
+        m_Shader->Bind();
+
+        m_Texture = std::make_unique<Texture>("res/textures/Levelup.png");
+        m_Shader->SetUniform1i("u_Texture", 0);
+    }
+
+    Levelup::~Levelup()
+    {
+    }
+
+    void Levelup::OnUpdate(float deltaTime)
+    {
+        Renderer renderer;
+        m_Texture->Bind();
+
+        {
+            glm::mat4 model = glm::translate(glm::mat4(1.0f), m_Translation);
+            glm::mat4 mvp = m_Proj * m_View * model;
+            m_Shader->Bind();
+            m_Shader->SetUniformMat4f("u_MVP", mvp);
+            renderer.Draw(*m_VAO, *m_IndexBuffer, *m_Shader);
+        }
+    }
+
+    void Levelup::OnRender()
+    {
+        Renderer renderer;
+        m_Texture->Bind();
+
+        {
+            glm::mat4 model = glm::translate(glm::mat4(1.0f), m_Translation);
+            glm::mat4 mvp = m_Proj * m_View * model;
+            m_Shader->Bind();
+            m_Shader->SetUniformMat4f("u_MVP", mvp);
+            renderer.Draw(*m_VAO, *m_IndexBuffer, *m_Shader);
+        }
     }
 }

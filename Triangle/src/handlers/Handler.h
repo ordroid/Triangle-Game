@@ -1,16 +1,18 @@
 #pragma once
 
+#pragma once
+
 #include <functional>
 #include <vector>
 #include <string>
 #include <iostream>
 
-namespace handle {
-	class Handle
+namespace handler {
+	class Handler
 	{
 	public:
-		Handle() {}
-		virtual ~Handle() {}
+		Handler() {}
+		virtual ~Handler() {}
 
 		virtual void OnUpdate(float deltaTime) {}
 		virtual void OnRender() {}

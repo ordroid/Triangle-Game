@@ -438,6 +438,9 @@
     <Image Include="res\textures\Background.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="res\textures\Levelup.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\vendor\stb_image\stb_image.cpp">
@@ -484,9 +487,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\handlers\Handle.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\vendor\stb_image\stb_image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1381,5 +1381,11 @@
     <ClInclude Include="src\handlers\Triangle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\handlers\Handler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="src\TODO.txt" />
   </ItemGroup>
 </Project>

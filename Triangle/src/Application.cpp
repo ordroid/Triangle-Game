@@ -70,13 +70,17 @@ int main(void)
         GLCall(glEnable(GL_BLEND));
 
         Renderer renderer;
-        handle::Triangle* handle = new handle::Triangle();
+        handler::Triangle* handler = new handler::Triangle();
         bool shoot = false;
         bool exists = false;
         bool rendered = false;
-        handle::Bullet* bullet1 = nullptr;
-        handle::Bullet* bullet2 = nullptr;
-        handle::Bullet* bullet3 = nullptr;
+        handler::Bullet* bullet1 = nullptr;
+        handler::Bullet* bullet2 = nullptr;
+        handler::Bullet* bullet3 = nullptr;
+
+        handler::Levelup* lvl = nullptr;
+        bool show = false;
+        int show_count = 0;
 
         long long current_speed = 3;
 
@@ -91,17 +95,17 @@ int main(void)
             GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
             renderer.Clear();
 
-            handle->OnRender();
+            handler->OnRender();
 
             glfwSetKeyCallback(window, key_callback);
 
-            shoot = handle->OnKeyPress(up_pressed, left_pressed, right_pressed, down_pressed, q_pressed, e_pressed, space_pressed);
+            shoot = handler->OnKeyPress(up_pressed, left_pressed, right_pressed, down_pressed, q_pressed, e_pressed, space_pressed);
           
             if (shoot && !exists)
             {
-                bullet1 = new handle::Bullet(handle);
-                bullet2 = new handle::Bullet(handle, 120.0f);
-                bullet3 = new handle::Bullet(handle, 240.0f);
+                bullet1 = new handler::Bullet(handler);
+                bullet2 = new handler::Bullet(handler, 120.0f);
+                bullet3 = new handler::Bullet(handler, 240.0f);
                 exists = true;
                 rendered = false;
                 start = std::chrono::system_clock::now();
@@ -110,7 +114,7 @@ int main(void)
             {
                 auto now = std::chrono::system_clock::now();
                 std::chrono::duration<double> elapsed_seconds = now - start;
-                if (elapsed_seconds.count() >= 0.5)
+                if (elapsed_seconds.count() >= 0.3)
                 {
                     exists = false;
                     delete bullet1;
@@ -136,35 +140,53 @@ int main(void)
                 bullet3->OnUpdate(0.0f);
             }
 
+            if (show)
+            {
+                lvl->OnUpdate(0.0f);
+                show_count++;
+            }
+
+            if (show_count >= 30)
+            {
+                show = false;
+                show_count = 0;
+            }
+
             auto current_time = std::chrono::system_clock::now();
             std::chrono::duration<double> elapsed_time = current_time - last_enemy;
             if (elapsed_time.count() > 0.3)
             {
-                for (int i = 0; i < handle->num_enemies; i++)
+                for (int i = 0; i < handler->num_enemies; i++)
                 {
-                    if (handle->enemies[i] == nullptr) {
-                        handle->enemies[i] = new handle::Enemy(current_speed);
-                        handle->enemies[i]->OnRender();
+                    if (handler->enemies[i] == nullptr) 
+                    {
+                        handler->enemies[i] = new handler::Enemy(current_speed);
+                        handler->enemies[i]->OnRender();
                         last_enemy = std::chrono::system_clock::now();
                         break;
                     }
 
-                    if (i == handle->num_enemies - 1)
+                    if (i == handler->num_enemies - 1)
                     {
-                        for (int j = 0; j < handle->num_enemies; j++)
+                        lvl = new handler::Levelup();
+                        lvl->OnRender();
+                        show = true;
+                        show_count = 0;
+
+                        for (int j = 0; j < handler->num_enemies; j++)
                         {
-                            delete handle->enemies[j];
-                            handle->enemies[j] = nullptr;
+                            delete handler->enemies[j];
+                            handler->enemies[j] = nullptr;
                         }
                         current_speed += 2;
                     }
                 }
             }
 
-            for (int i = 0; i < handle->num_enemies; i++)
+            for (int i = 0; i < handler->num_enemies; i++)
             {
-                if (handle->enemies[i])
-                    handle->enemies[i]->OnUpdate(0.0f);
+                if (handler->enemies[i])
+                    handler->enemies[i]->OnUpdate(0.0f);
             }
 
             /* Swap front and back buffers */
@@ -174,8 +196,6 @@ int main(void)
             GLCall(glfwPollEvents());
         }   
 
-        if (handle)
-            delete handle;
         if (bullet1)
             delete bullet1;
         if (bullet2)
@@ -183,11 +203,19 @@ int main(void)
         if (bullet3)
             delete bullet3;
 
-        for (int i = 0; i < handle->num_enemies; i++)
+        if (lvl)
+            delete lvl;
+
+        for (int i = 0; i < handler->num_enemies; i++)
         {
-            if (handle->enemies[i])
-                delete handle->enemies[i];
+            if (handler->enemies[i])
+                delete handler->enemies[i];
         }
+
+        if (handler)
+            delete handler;
+
+
     }
 
     glfwTerminate();
