@@ -6,6 +6,7 @@
 #include <string>
 #include <sstream>
 #include <chrono>
+#include <thread>
 
 #include "Renderer.h"
 
@@ -22,9 +23,7 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw_gl3.h"
 
-#include "tests/TestClearColor.h"
-#include "tests/TestTexture2D.h"
-#include "tests/TestKeyboard.h"
+#include "handlers/Triangle.h"
 
 bool up_pressed = false;
 bool left_pressed = false;
@@ -49,7 +48,7 @@ int main(void)
 
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(960, 540, "Triangle Game", NULL, NULL);
+    window = glfwCreateWindow(1920, 1080, "Triangle Game", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -71,11 +70,17 @@ int main(void)
         GLCall(glEnable(GL_BLEND));
 
         Renderer renderer;
-        test::TestKeyboard* test = new test::TestKeyboard();
+        handle::Triangle* handle = new handle::Triangle();
         bool shoot = false;
         bool exists = false;
         bool rendered = false;
-        test::Bullet* bullet = nullptr;
+        handle::Bullet* bullet1 = nullptr;
+        handle::Bullet* bullet2 = nullptr;
+        handle::Bullet* bullet3 = nullptr;
+
+        long long current_speed = 3;
+
+        auto last_enemy = std::chrono::system_clock::now();
 
         auto start = std::chrono::system_clock::now();
 
@@ -86,15 +91,17 @@ int main(void)
             GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
             renderer.Clear();
 
-            test->OnRender();
+            handle->OnRender();
 
             glfwSetKeyCallback(window, key_callback);
 
-            shoot = test->OnKeyPress(up_pressed, left_pressed, right_pressed, down_pressed, q_pressed, e_pressed, space_pressed);
+            shoot = handle->OnKeyPress(up_pressed, left_pressed, right_pressed, down_pressed, q_pressed, e_pressed, space_pressed);
           
             if (shoot && !exists)
             {
-                bullet = new test::Bullet(test);
+                bullet1 = new handle::Bullet(handle);
+                bullet2 = new handle::Bullet(handle, 120.0f);
+                bullet3 = new handle::Bullet(handle, 240.0f);
                 exists = true;
                 rendered = false;
                 start = std::chrono::system_clock::now();
@@ -106,18 +113,59 @@ int main(void)
                 if (elapsed_seconds.count() >= 0.5)
                 {
                     exists = false;
-                    delete bullet;
-                    bullet = nullptr;
+                    delete bullet1;
+                    delete bullet2;
+                    delete bullet3;
+                    bullet1 = nullptr;
+                    bullet2 = nullptr;
+                    bullet3 = nullptr;
                 }
             }
 
             if (exists && !rendered)
             {
-                bullet->OnRender();
+                bullet1->OnRender();
+                bullet2->OnRender();
+                bullet3->OnRender();
                 rendered = true;
             }
             else if (exists && rendered)
-                bullet->OnUpdate(0.0f);
+            {
+                bullet1->OnUpdate(0.0f);
+                bullet2->OnUpdate(0.0f);
+                bullet3->OnUpdate(0.0f);
+            }
+
+            auto current_time = std::chrono::system_clock::now();
+            std::chrono::duration<double> elapsed_time = current_time - last_enemy;
+            if (elapsed_time.count() > 0.3)
+            {
+                for (int i = 0; i < handle->num_enemies; i++)
+                {
+                    if (handle->enemies[i] == nullptr) {
+                        handle->enemies[i] = new handle::Enemy(current_speed);
+                        handle->enemies[i]->OnRender();
+                        last_enemy = std::chrono::system_clock::now();
+                        break;
+                    }
+
+                    if (i == handle->num_enemies - 1)
+                    {
+                        for (int j = 0; j < handle->num_enemies; j++)
+                        {
+                            delete handle->enemies[j];
+                            handle->enemies[j] = nullptr;
+                        }
+                        current_speed += 2;
+                    }
+                }
+            }
+
+            for (int i = 0; i < handle->num_enemies; i++)
+            {
+                if (handle->enemies[i])
+                    handle->enemies[i]->OnUpdate(0.0f);
+            }
 
             /* Swap front and back buffers */
             GLCall(glfwSwapBuffers(window));
@@ -126,10 +174,20 @@ int main(void)
             GLCall(glfwPollEvents());
         }   
 
-        if (test)
-            delete test;
-        if (bullet)
-            delete bullet;
+        if (handle)
+            delete handle;
+        if (bullet1)
+            delete bullet1;
+        if (bullet2)
+            delete bullet2;
+        if (bullet3)
+            delete bullet3;
+
+        for (int i = 0; i < handle->num_enemies; i++)
+        {
+            if (handle->enemies[i])
+                delete handle->enemies[i];
+        }
     }
 
     glfwTerminate();
@@ -138,21 +196,21 @@ int main(void)
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    if (key == GLFW_KEY_W && action == GLFW_PRESS)
+    if ((key == GLFW_KEY_W || key == GLFW_KEY_UP) && action == GLFW_PRESS)
         up_pressed = true;
-    else if (key == GLFW_KEY_W && action == GLFW_RELEASE)
+    else if ((key == GLFW_KEY_W || key == GLFW_KEY_UP) && action == GLFW_RELEASE)
         up_pressed = false;
-    else if (key == GLFW_KEY_A && action == GLFW_PRESS)
+    else if ((key == GLFW_KEY_A || key == GLFW_KEY_LEFT) && action == GLFW_PRESS)
         left_pressed = true;
-    else if (key == GLFW_KEY_A && action == GLFW_RELEASE)
+    else if ((key == GLFW_KEY_A || key == GLFW_KEY_LEFT) && action == GLFW_RELEASE)
         left_pressed = false;
-    else if (key == GLFW_KEY_D && action == GLFW_PRESS)
+    else if ((key == GLFW_KEY_D || key == GLFW_KEY_RIGHT) && action == GLFW_PRESS)
         right_pressed = true;
-    else if (key == GLFW_KEY_D && action == GLFW_RELEASE)
+    else if ((key == GLFW_KEY_D || key == GLFW_KEY_RIGHT) && action == GLFW_RELEASE)
         right_pressed = false;
-    else if (key == GLFW_KEY_S && action == GLFW_PRESS)
+    else if ((key == GLFW_KEY_S || key == GLFW_KEY_DOWN) && action == GLFW_PRESS)
         down_pressed = true;
-    else if (key == GLFW_KEY_S && action == GLFW_RELEASE)
+    else if ((key == GLFW_KEY_S || key == GLFW_KEY_DOWN) && action == GLFW_RELEASE)
         down_pressed = false;
     else if (key == GLFW_KEY_Q && action == GLFW_PRESS)
         q_pressed = true;
