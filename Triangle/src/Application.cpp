@@ -32,7 +32,9 @@ bool down_pressed = false;
 bool q_pressed = false;
 bool e_pressed = false;
 bool space_pressed = false;
+bool enter_pressed = false;
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+void instructions_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 int main(void)
 {
@@ -106,13 +108,11 @@ int main(void)
             GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
             renderer.Clear();
             
-            auto time_now = std::chrono::system_clock::now();
-            std::chrono::duration<double> time_instructions = time_now - start_time;
-            if (time_instructions.count() < 7)
+            glfwSetKeyCallback(window, instructions_callback);
+
+            if (!instructions->OnKeyPress(enter_pressed))
             {
                 instructions->OnRender();
-                time_now = std::chrono::system_clock::now();
-                time_instructions = time_now - start_time;
             }
             else
             {
@@ -316,4 +316,10 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         space_pressed = true;
     else if (key == GLFW_KEY_SPACE && action == GLFW_RELEASE)
         space_pressed = false;
+}
+
+void instructions_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    if (key == GLFW_KEY_ENTER && action == GLFW_PRESS)
+        enter_pressed = true;
 }

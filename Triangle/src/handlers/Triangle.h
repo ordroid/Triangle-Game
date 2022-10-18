@@ -142,12 +142,20 @@ namespace handler {
 		void OnUpdate(float deltaTime) override;
 		void OnRender() override;
 
+		bool OnKeyPress(bool enter_pressed);
+
 	private:
 		std::unique_ptr<VertexArray> m_VAO;
 		std::unique_ptr<VertexBuffer> m_VertexBuffer;
 		std::unique_ptr<IndexBuffer> m_IndexBuffer;
 		std::unique_ptr<Shader> m_Shader;
 		std::unique_ptr<Texture> m_Texture;
+
+		std::unique_ptr<VertexArray> m_VAO2;
+		std::unique_ptr<VertexBuffer> m_VertexBuffer2;
+		std::unique_ptr<IndexBuffer> m_IndexBuffer2;
+		std::unique_ptr<Shader> m_Shader2;
+		std::unique_ptr<Texture> m_Texture2;
 
 		glm::mat4 m_Proj;
 		glm::mat4 m_View;

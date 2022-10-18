@@ -388,11 +388,23 @@ namespace handler {
         float positions[] = {
              280.0f, 140.0f, 0.0f, 0.0f,  // 0
              660.0f, 140.0f, 1.0f, 0.0f,  // 1
-             660.0f, 380.0f, 1.0f, 1.0f,  // 2
-             280.0f, 380.0f, 0.0f, 1.0f   // 3
+             660.0f, 440.0f, 1.0f, 1.0f,  // 2
+             280.0f, 440.0f, 0.0f, 1.0f   // 3
+        };
+
+        float positions2[] = {
+            280.0f, 100.0f, 0.0f, 0.0f,  // 0
+            660.0f, 100.0f, 1.0f, 0.0f,  // 1
+            660.0f, 140.0f, 1.0f, 1.0f,  // 2
+            280.0f, 140.0f, 0.0f, 1.0f   // 3
         };
 
         unsigned int indices[] = {
+            0, 1, 2,
+            2, 3, 0
+        };
+
+        unsigned int indices2[] = {
             0, 1, 2,
             2, 3, 0
         };
@@ -415,6 +427,23 @@ namespace handler {
 
         m_Texture = std::make_unique<Texture>("res/textures/Instructions.png");
         m_Shader->SetUniform1i("u_Texture", 0);
+
+
+        m_VAO2 = std::make_unique<VertexArray>();
+
+        m_VertexBuffer2 = std::make_unique<VertexBuffer>(positions2, 4 * 4 * sizeof(float));
+        VertexBufferLayout layout2;
+        layout2.Push<float>(2);
+        layout2.Push<float>(2);
+
+        m_VAO2->AddBuffer(*m_VertexBuffer2, layout2);
+        m_IndexBuffer2 = std::make_unique<IndexBuffer>(indices2, 6);
+
+        m_Shader2 = std::make_unique<Shader>("res/shaders/Basic.shader");
+        m_Shader2->Bind();
+
+        m_Texture2 = std::make_unique<Texture>("res/textures/Instructions2.png");
+        m_Shader2->SetUniform1i("u_Texture", 0);
     }
     
     Instructions::~Instructions()
@@ -437,5 +466,23 @@ namespace handler {
             m_Shader->SetUniformMat4f("u_MVP", mvp);
             renderer.Draw(*m_VAO, *m_IndexBuffer, *m_Shader);
         }
+
+        Renderer renderer2;
+        m_Texture2->Bind();
+
+        {
+            glm::mat4 model = glm::translate(glm::mat4(1.0f), m_Translation);
+            glm::mat4 mvp = m_Proj * m_View * model;
+            m_Shader2->Bind();
+            m_Shader2->SetUniformMat4f("u_MVP", mvp);
+            renderer.Draw(*m_VAO2, *m_IndexBuffer2, *m_Shader2);
+        }
+    }
+
+    bool Instructions::OnKeyPress(bool enter_pressed)
+    {
+        if (enter_pressed)
+            return true;
+        return false;
     }
 }
