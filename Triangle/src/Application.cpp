@@ -70,6 +70,9 @@ int main(void)
         GLCall(glEnable(GL_BLEND));
 
         Renderer renderer;
+
+        handler::Instructions* instructions = new handler::Instructions();
+
         handler::Triangle* handler = new handler::Triangle();
         bool shoot = false;
         int exists = 0;
@@ -89,6 +92,9 @@ int main(void)
 
         long long current_speed = 3;
 
+        int loop_instructions = 0;
+        auto start_time = std::chrono::system_clock::now();
+
         auto last_enemy = std::chrono::system_clock::now();
 
         auto start = std::chrono::system_clock::now();
@@ -99,144 +105,149 @@ int main(void)
             /* Render here */
             GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
             renderer.Clear();
-
-            handler->OnRender();
-
-            glfwSetKeyCallback(window, key_callback);
-
-            shoot = handler->OnKeyPress(up_pressed, left_pressed, right_pressed, down_pressed, q_pressed, e_pressed, space_pressed);
-
-            if (shoot && exists < 2)
+            
+            auto time_now = std::chrono::system_clock::now();
+            std::chrono::duration<double> time_instructions = time_now - start_time;
+            if (time_instructions.count() < 7)
             {
-                bullets[0 + shooting] = new handler::Bullet(handler);
-                bullets[1 + shooting] = new handler::Bullet(handler, 120.0f);
-                bullets[2 + shooting] = new handler::Bullet(handler, 240.0f);
-
-                start = std::chrono::system_clock::now();
-
-                exists++;
-
-                if (shooting == 0)
-                    rendered_first = false;
-                else
-                    rendered_second = false;
-
-                shooting = 3 - shooting;
+                instructions->OnRender();
+                time_now = std::chrono::system_clock::now();
+                time_instructions = time_now - start_time;
             }
             else
             {
-                auto now = std::chrono::system_clock::now();
-                std::chrono::duration<double> elapsed_seconds = now - start;
-                if (elapsed_seconds.count() >= 0.3)
-                {
-                    if (bullets[0 + shooting])
-                    {
-                        delete bullets[0 + shooting];
-                        delete bullets[1 + shooting];
-                        delete bullets[2 + shooting];
-                        bullets[0 + shooting] = nullptr;
-                        bullets[1 + shooting] = nullptr;
-                        bullets[2 + shooting] = nullptr;
-                        exists--;
-                    }
-                }
-            }
+                handler->OnRender();
 
-            bool change_rendered_first = false;
-            bool change_rendered_second = false;
-            if (exists > 0)
-            { 
-                for (int i = 0; i < 3; i++)
+                glfwSetKeyCallback(window, key_callback);
+
+                shoot = handler->OnKeyPress(up_pressed, left_pressed, right_pressed, down_pressed, q_pressed, e_pressed, space_pressed);
+
+                if (shoot && exists < 2)
                 {
-                    if (!rendered_first)
+                    bullets[0 + shooting] = new handler::Bullet(handler);
+                    bullets[1 + shooting] = new handler::Bullet(handler, 120.0f);
+                    bullets[2 + shooting] = new handler::Bullet(handler, 240.0f);
+
+                    start = std::chrono::system_clock::now();
+
+                    exists++;
+
+                    if (shooting == 0)
+                        rendered_first = false;
+                    else
+                        rendered_second = false;
+
+                    shooting = 3 - shooting;
+                }
+                else
+                {
+                    auto now = std::chrono::system_clock::now();
+                    std::chrono::duration<double> elapsed_seconds = now - start;
+                    if (elapsed_seconds.count() >= 0.3)
                     {
-                        if (bullets[i])
+                        if (bullets[0 + shooting])
                         {
-                            bullets[i]->OnRender();
-                            change_rendered_first = true;
+                            delete bullets[0 + shooting];
+                            delete bullets[1 + shooting];
+                            delete bullets[2 + shooting];
+                            bullets[0 + shooting] = nullptr;
+                            bullets[1 + shooting] = nullptr;
+                            bullets[2 + shooting] = nullptr;
+                            exists--;
                         }
                     }
-                    else
-                    {
-                        if (bullets[i])
-                            bullets[i]->OnUpdate(0.0f);
-                    }
+                }
 
-                    if (!rendered_second)
+                bool change_rendered_first = false;
+                bool change_rendered_second = false;
+                if (exists > 0)
+                {
+                    for (int i = 0; i < 3; i++)
                     {
-                        if (bullets[i + 3])
+                        if (!rendered_first)
                         {
-                            bullets[i + 3]->OnRender();
-                            change_rendered_second = true;
+                            if (bullets[i])
+                            {
+                                bullets[i]->OnRender();
+                                change_rendered_first = true;
+                            }
+                        }
+                        else
+                        {
+                            if (bullets[i])
+                                bullets[i]->OnUpdate(0.0f);
+                        }
+
+                        if (!rendered_second)
+                        {
+                            if (bullets[i + 3])
+                            {
+                                bullets[i + 3]->OnRender();
+                                change_rendered_second = true;
+                            }
+                        }
+                        else
+                        {
+                            if (bullets[i + 3])
+                                bullets[i + 3]->OnUpdate(0.0f);
                         }
                     }
-                    else
+
+                    if (change_rendered_first)
+                        rendered_first = true;
+
+                    if (change_rendered_second)
+                        rendered_second = true;
+                }
+
+                if (show)
+                {
+                    lvl->OnUpdate(0.0f);
+                    show_count++;
+                }
+
+                if (show_count == 30)
+                {
+                    show = false;
+                    show_count = 0;
+                }
+
+                auto current_time = std::chrono::system_clock::now();
+                std::chrono::duration<double> elapsed_time = current_time - last_enemy;
+                if (elapsed_time.count() > 0.3)
+                {
+                    for (int i = 0; i < handler->num_enemies; i++)
                     {
-                        if (bullets[i + 3])
-                            bullets[i + 3]->OnUpdate(0.0f);
+                        if (handler->enemies[i] == nullptr)
+                        {
+                            handler->enemies[i] = new handler::Enemy(current_speed);
+                            handler->enemies[i]->OnRender();
+                            last_enemy = std::chrono::system_clock::now();
+                            break;
+                        }
+
+                        if (i == handler->num_enemies - 1)
+                        {
+                            lvl = new handler::Levelup();
+                            lvl->OnRender();
+                            show = true;
+                            show_count = 0;
+
+                            for (int j = 0; j < handler->num_enemies; j++)
+                            {
+                                delete handler->enemies[j];
+                                handler->enemies[j] = nullptr;
+                            }
+                            current_speed += 2;
+                        }
                     }
                 }
 
-                if (change_rendered_first)
-                {
-                    rendered_first = true;
-                    change_rendered_first = false;
-                }
-
-                if (change_rendered_second)
-                {
-                    rendered_second = true;
-                    change_rendered_second = false;
-                }
-            }
-
-            if (show)
-            {
-                lvl->OnUpdate(0.0f);
-                show_count++;
-            }
-
-            if (show_count == 40)
-            {
-                show = false;
-                show_count = 0;
-            }
-
-            auto current_time = std::chrono::system_clock::now();
-            std::chrono::duration<double> elapsed_time = current_time - last_enemy;
-            if (elapsed_time.count() > 0.3)
-            {
                 for (int i = 0; i < handler->num_enemies; i++)
                 {
-                    if (handler->enemies[i] == nullptr) 
-                    {
-                        handler->enemies[i] = new handler::Enemy(current_speed);
-                        handler->enemies[i]->OnRender();
-                        last_enemy = std::chrono::system_clock::now();
-                        break;
-                    }
-
-                    if (i == handler->num_enemies - 1)
-                    {
-                        lvl = new handler::Levelup();
-                        lvl->OnRender();
-                        show = true;
-                        show_count = 0;
-
-                        for (int j = 0; j < handler->num_enemies; j++)
-                        {
-                            delete handler->enemies[j];
-                            handler->enemies[j] = nullptr;
-                        }
-                        current_speed += 2;
-                    }
+                    if (handler->enemies[i])
+                        handler->enemies[i]->OnUpdate(0.0f);
                 }
-            }
-
-            for (int i = 0; i < handler->num_enemies; i++)
-            {
-                if (handler->enemies[i])
-                    handler->enemies[i]->OnUpdate(0.0f);
             }
 
             /* Swap front and back buffers */
@@ -255,6 +266,9 @@ int main(void)
 
         if (lvl)
             delete lvl;
+
+        if (instructions)
+            delete instructions;
 
         for (int i = 0; i < handler->num_enemies; i++)
         {

@@ -1,2 +1,4 @@
 1. Add collision detection.
 2. Add burning animation.
+3. Change instruction window to disappear when any key is pressed.
+4. Output the score after the game ends.
