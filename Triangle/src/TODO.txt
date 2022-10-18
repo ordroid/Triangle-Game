@@ -1,4 +1,2 @@
 1. Add collision detection.
 2. Add burning animation.
-3. Change bullets to an array of bullets and let them "live" longer.
-4. Add "leveling up..." animation when needed.

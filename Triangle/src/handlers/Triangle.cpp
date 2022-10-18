@@ -235,7 +235,7 @@ namespace handler {
                                     m_View(glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0))),
                                     m_Translation(200, 200, 0), speed(speed)
     {
-        radius = float(rand() % 500 + 400);
+        radius = float(rand() % 500 + 500);
         degrees = float(rand() % 360);
 
         float pos_x = radius * sin(glm::radians(degrees));
@@ -316,10 +316,10 @@ namespace handler {
                          m_Translation(0, 0, 0)
     {
         float positions[] = {
-             430.0f, 240.0f, 0.0f, 0.0f,  // 0
-             530.0f, 240.0f, 1.0f, 0.0f,  // 1
-             530.0f, 300.0f, 1.0f, 1.0f,  // 2
-             430.0f, 300.0f, 0.0f, 1.0f   // 3
+             410.0f, 240.0f, 0.0f, 0.0f,  // 0
+             550.0f, 240.0f, 1.0f, 0.0f,  // 1
+             550.0f, 300.0f, 1.0f, 1.0f,  // 2
+             410.0f, 300.0f, 0.0f, 1.0f   // 3
         };
 
         unsigned int indices[] = {

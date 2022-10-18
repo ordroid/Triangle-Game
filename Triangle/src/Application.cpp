@@ -72,11 +72,16 @@ int main(void)
         Renderer renderer;
         handler::Triangle* handler = new handler::Triangle();
         bool shoot = false;
-        bool exists = false;
-        bool rendered = false;
-        handler::Bullet* bullet1 = nullptr;
-        handler::Bullet* bullet2 = nullptr;
-        handler::Bullet* bullet3 = nullptr;
+        int exists = 0;
+        bool rendered_first = false;
+        bool rendered_second = false;
+
+        handler::Bullet* bullets[6]{};
+        for (int i = 0; i < 6; i++)
+        {
+            bullets[i] = nullptr;
+        }
+        int shooting = 0;
 
         handler::Levelup* lvl = nullptr;
         bool show = false;
@@ -100,44 +105,89 @@ int main(void)
             glfwSetKeyCallback(window, key_callback);
 
             shoot = handler->OnKeyPress(up_pressed, left_pressed, right_pressed, down_pressed, q_pressed, e_pressed, space_pressed);
-          
-            if (shoot && !exists)
+
+            if (shoot && exists < 2)
             {
-                bullet1 = new handler::Bullet(handler);
-                bullet2 = new handler::Bullet(handler, 120.0f);
-                bullet3 = new handler::Bullet(handler, 240.0f);
-                exists = true;
-                rendered = false;
+                bullets[0 + shooting] = new handler::Bullet(handler);
+                bullets[1 + shooting] = new handler::Bullet(handler, 120.0f);
+                bullets[2 + shooting] = new handler::Bullet(handler, 240.0f);
+
                 start = std::chrono::system_clock::now();
+
+                exists++;
+
+                if (shooting == 0)
+                    rendered_first = false;
+                else
+                    rendered_second = false;
+
+                shooting = 3 - shooting;
             }
-            else if (exists)
+            else
             {
                 auto now = std::chrono::system_clock::now();
                 std::chrono::duration<double> elapsed_seconds = now - start;
                 if (elapsed_seconds.count() >= 0.3)
                 {
-                    exists = false;
-                    delete bullet1;
-                    delete bullet2;
-                    delete bullet3;
-                    bullet1 = nullptr;
-                    bullet2 = nullptr;
-                    bullet3 = nullptr;
+                    if (bullets[0 + shooting])
+                    {
+                        delete bullets[0 + shooting];
+                        delete bullets[1 + shooting];
+                        delete bullets[2 + shooting];
+                        bullets[0 + shooting] = nullptr;
+                        bullets[1 + shooting] = nullptr;
+                        bullets[2 + shooting] = nullptr;
+                        exists--;
+                    }
                 }
             }
 
-            if (exists && !rendered)
-            {
-                bullet1->OnRender();
-                bullet2->OnRender();
-                bullet3->OnRender();
-                rendered = true;
-            }
-            else if (exists && rendered)
-            {
-                bullet1->OnUpdate(0.0f);
-                bullet2->OnUpdate(0.0f);
-                bullet3->OnUpdate(0.0f);
+            bool change_rendered_first = false;
+            bool change_rendered_second = false;
+            if (exists > 0)
+            { 
+                for (int i = 0; i < 3; i++)
+                {
+                    if (!rendered_first)
+                    {
+                        if (bullets[i])
+                        {
+                            bullets[i]->OnRender();
+                            change_rendered_first = true;
+                        }
+                    }
+                    else
+                    {
+                        if (bullets[i])
+                            bullets[i]->OnUpdate(0.0f);
+                    }
+
+                    if (!rendered_second)
+                    {
+                        if (bullets[i + 3])
+                        {
+                            bullets[i + 3]->OnRender();
+                            change_rendered_second = true;
+                        }
+                    }
+                    else
+                    {
+                        if (bullets[i + 3])
+                            bullets[i + 3]->OnUpdate(0.0f);
+                    }
+                }
+
+                if (change_rendered_first)
+                {
+                    rendered_first = true;
+                    change_rendered_first = false;
+                }
+
+                if (change_rendered_second)
+                {
+                    rendered_second = true;
+                    change_rendered_second = false;
+                }
             }
 
             if (show)
@@ -146,7 +196,7 @@ int main(void)
                 show_count++;
             }
 
-            if (show_count >= 30)
+            if (show_count == 40)
             {
                 show = false;
                 show_count = 0;
@@ -196,12 +246,12 @@ int main(void)
             GLCall(glfwPollEvents());
         }   
 
-        if (bullet1)
-            delete bullet1;
-        if (bullet2)
-            delete bullet2;
-        if (bullet3)
-            delete bullet3;
+        if (bullets[0])
+            delete bullets[0];
+        if (bullets[1])
+            delete bullets[1];
+        if (bullets[2])
+            delete bullets[2];
 
         if (lvl)
             delete lvl;
