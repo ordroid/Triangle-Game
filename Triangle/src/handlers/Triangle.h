@@ -46,7 +46,7 @@ namespace handler {
 		glm::vec3 m_bg_Translation;
 		glm::mat4 m_bg_MVP;
 
-		float m_Rotation;
+		int m_Rotation;
 		
 		friend class Bullet;
 		friend class Enemy;
@@ -54,6 +54,13 @@ namespace handler {
 	public:
 		Enemy* enemies[ENEMIES];
 		int num_enemies = ENEMIES;
+
+		float getVert1x();
+		float getVert1y();
+		float getVert2x();
+		float getVert2y();
+		float getVert3x();
+		float getVert3y();
 	};
 	
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -78,6 +85,14 @@ namespace handler {
 
 		glm::vec3 m_BulletTranslation;
 		float saved_rotation;
+
+	public:
+		float getVert1x();
+		float getVert1y();
+		float getVert2x();
+		float getVert2y();
+		float getVert3x();
+		float getVert3y();
 	};
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -106,6 +121,16 @@ namespace handler {
 		float degrees;
 
 		long long speed;
+
+	public:
+		float getVert1x();
+		float getVert1y();
+		float getVert2x();
+		float getVert2y();
+		float getVert3x();
+		float getVert3y();
+		float getVert4x();
+		float getVert4y();
 	};
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////

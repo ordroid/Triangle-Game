@@ -25,6 +25,9 @@
 
 #include "handlers/Triangle.h"
 
+
+#define UNINITIALIZED -1000.0f
+
 bool up_pressed = false;
 bool left_pressed = false;
 bool right_pressed = false;
@@ -35,6 +38,7 @@ bool space_pressed = false;
 bool enter_pressed = false;
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void instructions_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+void check_collisions(handler::Triangle* triangle, handler::Bullet* bullets[]);
 
 int main(void)
 {
@@ -248,6 +252,8 @@ int main(void)
                     if (handler->enemies[i])
                         handler->enemies[i]->OnUpdate(0.0f);
                 }
+
+                check_collisions(handler, bullets);
             }
 
             /* Swap front and back buffers */
@@ -322,4 +328,158 @@ void instructions_callback(GLFWwindow* window, int key, int scancode, int action
 {
     if (key == GLFW_KEY_ENTER && action == GLFW_PRESS)
         enter_pressed = true;
+}
+
+void check_collisions(handler::Triangle* triangle, handler::Bullet* bullets[])
+{
+    handler::Enemy** enemies = triangle->enemies;
+
+    // Collision of Triangle and Enemies:
+
+    float triangle_vertices[3][2] = { {triangle->getVert1x(), triangle->getVert1y()},
+                                      {triangle->getVert2x(), triangle->getVert2y()},
+                                      {triangle->getVert3x(), triangle->getVert3y()} };
+
+    float bullet0_vertices[3][2], bullet1_vertices[3][2], bullet2_vertices[3][2], 
+          bullet3_vertices[3][2], bullet4_vertices[3][2], bullet5_vertices[3][2];
+
+
+    if (bullets[0])
+    {
+        bullet0_vertices[0][0] = bullets[0]->getVert1x();
+        bullet0_vertices[0][1] = bullets[0]->getVert1y();
+        bullet0_vertices[1][0] = bullets[0]->getVert2x();
+        bullet0_vertices[1][1] = bullets[0]->getVert2y();
+        bullet0_vertices[2][0] = bullets[0]->getVert3x();
+        bullet0_vertices[2][1] = bullets[0]->getVert3y();
+
+        bullet1_vertices[0][0] = bullets[1]->getVert1x();
+        bullet1_vertices[0][1] = bullets[1]->getVert1y();
+        bullet1_vertices[1][0] = bullets[1]->getVert2x();
+        bullet1_vertices[1][1] = bullets[1]->getVert2y();
+        bullet1_vertices[2][0] = bullets[1]->getVert3x();
+        bullet1_vertices[2][1] = bullets[1]->getVert3y();
+
+        bullet2_vertices[0][0] = bullets[2]->getVert1x();
+        bullet2_vertices[0][1] = bullets[2]->getVert1y();
+        bullet2_vertices[1][0] = bullets[2]->getVert2x();
+        bullet2_vertices[1][1] = bullets[2]->getVert2y();
+        bullet2_vertices[2][0] = bullets[2]->getVert3x();
+        bullet2_vertices[2][1] = bullets[2]->getVert3y();
+    }
+    else
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < 2; j++)
+            {
+                bullet0_vertices[i][j] = UNINITIALIZED;
+                bullet1_vertices[i][j] = UNINITIALIZED;
+                bullet2_vertices[i][j] = UNINITIALIZED;
+            }
+        }
+    }
+
+    if (bullets[3])
+    {
+        bullet3_vertices[0][0] = bullets[3]->getVert1x();
+        bullet3_vertices[0][1] = bullets[3]->getVert1y();
+        bullet3_vertices[1][0] = bullets[3]->getVert2x();
+        bullet3_vertices[1][1] = bullets[3]->getVert2y();
+        bullet3_vertices[2][0] = bullets[3]->getVert3x();
+        bullet3_vertices[2][1] = bullets[3]->getVert3y();
+
+        bullet4_vertices[0][0] = bullets[4]->getVert1x();
+        bullet4_vertices[0][1] = bullets[4]->getVert1y();
+        bullet4_vertices[1][0] = bullets[4]->getVert2x();
+        bullet4_vertices[1][1] = bullets[4]->getVert2y();
+        bullet4_vertices[2][0] = bullets[4]->getVert3x();
+        bullet4_vertices[2][1] = bullets[4]->getVert3y();
+
+        bullet5_vertices[0][0] = bullets[5]->getVert1x();
+        bullet5_vertices[0][1] = bullets[5]->getVert1y();
+        bullet5_vertices[1][0] = bullets[5]->getVert2x();
+        bullet5_vertices[1][1] = bullets[5]->getVert2y();
+        bullet5_vertices[2][0] = bullets[5]->getVert3x();
+        bullet5_vertices[2][1] = bullets[5]->getVert3y();
+    }
+    else
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < 2; j++)
+            {
+                bullet3_vertices[i][j] = UNINITIALIZED;
+                bullet4_vertices[i][j] = UNINITIALIZED;
+                bullet5_vertices[i][j] = UNINITIALIZED;
+            }
+        }
+    }
+
+    //std::cout << "Triangle vertex #0: x: " << triangle_vertices[0][0] << ", y: " << triangle_vertices[0][1] << std::endl;
+
+    for (int i = 0; i < triangle->num_enemies; i++)
+    {
+        if (!enemies[i])
+            continue;
+
+        float enemy_vertices[4][2] = { {enemies[i]->getVert1x(), enemies[i]->getVert1y()},
+                                       {enemies[i]->getVert2x(), enemies[i]->getVert2y()},
+                                       {enemies[i]->getVert3x(), enemies[i]->getVert3y()},
+                                       {enemies[i]->getVert4x(), enemies[i]->getVert4y()} };
+
+        if (((enemy_vertices[0][0] <= triangle_vertices[0][0] && triangle_vertices[0][0] <= enemy_vertices[1][0])
+            || (enemy_vertices[0][0] <= triangle_vertices[1][0] && triangle_vertices[1][0] <= enemy_vertices[1][0])
+            || (enemy_vertices[0][0] <= triangle_vertices[2][0] && triangle_vertices[2][0] <= enemy_vertices[1][0]))
+            && ((enemy_vertices[1][1] <= triangle_vertices[0][1] && triangle_vertices[0][1] <= enemy_vertices[2][1])
+            || (enemy_vertices[1][1] <= triangle_vertices[1][1] && triangle_vertices[1][1] <= enemy_vertices[2][1])
+            || (enemy_vertices[1][1] <= triangle_vertices[2][1] && triangle_vertices[2][1] <= enemy_vertices[2][1])))
+        {
+            //std::cout << "BOOM! Vertex: X: " << enemies[i]->getVert1x() << ", Y : " << enemies[i]->getVert1y() << std::endl;
+            delete enemies[i];
+            enemies[i] = nullptr;
+        }
+
+
+        if ((((enemy_vertices[0][0] <= bullet0_vertices[0][0] && bullet0_vertices[0][0] <= enemy_vertices[1][0])
+            || (enemy_vertices[0][0] <= bullet0_vertices[1][0] && bullet0_vertices[1][0] <= enemy_vertices[1][0])
+            || (enemy_vertices[0][0] <= bullet0_vertices[2][0] && bullet0_vertices[2][0] <= enemy_vertices[1][0]))
+            && ((enemy_vertices[1][1] <= bullet0_vertices[0][1] && bullet0_vertices[0][1] <= enemy_vertices[2][1])
+            || (enemy_vertices[1][1] <= bullet0_vertices[1][1] && bullet0_vertices[1][1] <= enemy_vertices[2][1])
+            || (enemy_vertices[1][1] <= bullet0_vertices[2][1] && bullet0_vertices[2][1] <= enemy_vertices[2][1])))
+            || (((enemy_vertices[0][0] <= bullet1_vertices[0][0] && bullet1_vertices[0][0] <= enemy_vertices[1][0])
+            || (enemy_vertices[0][0] <= bullet1_vertices[1][0] && bullet1_vertices[1][0] <= enemy_vertices[1][0])
+            || (enemy_vertices[0][0] <= bullet1_vertices[2][0] && bullet1_vertices[2][0] <= enemy_vertices[1][0]))
+            && ((enemy_vertices[1][1] <= bullet1_vertices[0][1] && bullet1_vertices[0][1] <= enemy_vertices[2][1])
+            || (enemy_vertices[1][1] <= bullet1_vertices[1][1] && bullet1_vertices[1][1] <= enemy_vertices[2][1])
+            || (enemy_vertices[1][1] <= bullet1_vertices[2][1] && bullet1_vertices[2][1] <= enemy_vertices[2][1])))
+            || (((enemy_vertices[0][0] <= bullet2_vertices[0][0] && bullet2_vertices[0][0] <= enemy_vertices[1][0])
+            || (enemy_vertices[0][0] <= bullet2_vertices[1][0] && bullet2_vertices[1][0] <= enemy_vertices[1][0])
+            || (enemy_vertices[0][0] <= bullet2_vertices[2][0] && bullet2_vertices[2][0] <= enemy_vertices[1][0]))
+            && ((enemy_vertices[1][1] <= bullet2_vertices[0][1] && bullet2_vertices[0][1] <= enemy_vertices[2][1])
+            || (enemy_vertices[1][1] <= bullet2_vertices[1][1] && bullet2_vertices[1][1] <= enemy_vertices[2][1])
+            || (enemy_vertices[1][1] <= bullet2_vertices[2][1] && bullet2_vertices[2][1] <= enemy_vertices[2][1])))
+            || (((enemy_vertices[0][0] <= bullet3_vertices[0][0] && bullet3_vertices[0][0] <= enemy_vertices[1][0])
+            || (enemy_vertices[0][0] <= bullet3_vertices[1][0] && bullet3_vertices[1][0] <= enemy_vertices[1][0])
+            || (enemy_vertices[0][0] <= bullet3_vertices[2][0] && bullet3_vertices[2][0] <= enemy_vertices[1][0]))
+            && ((enemy_vertices[1][1] <= bullet3_vertices[0][1] && bullet3_vertices[0][1] <= enemy_vertices[2][1])
+            || (enemy_vertices[1][1] <= bullet3_vertices[1][1] && bullet3_vertices[1][1] <= enemy_vertices[2][1])
+            || (enemy_vertices[1][1] <= bullet3_vertices[2][1] && bullet3_vertices[2][1] <= enemy_vertices[2][1])))
+            || (((enemy_vertices[0][0] <= bullet4_vertices[0][0] && bullet4_vertices[0][0] <= enemy_vertices[1][0])
+            || (enemy_vertices[0][0] <= bullet4_vertices[1][0] && bullet4_vertices[1][0] <= enemy_vertices[1][0])
+            || (enemy_vertices[0][0] <= bullet4_vertices[2][0] && bullet4_vertices[2][0] <= enemy_vertices[1][0]))
+            && ((enemy_vertices[1][1] <= bullet4_vertices[0][1] && bullet4_vertices[0][1] <= enemy_vertices[2][1])
+            || (enemy_vertices[1][1] <= bullet4_vertices[1][1] && bullet4_vertices[1][1] <= enemy_vertices[2][1])
+            || (enemy_vertices[1][1] <= bullet4_vertices[2][1] && bullet4_vertices[2][1] <= enemy_vertices[2][1])))
+            || (((enemy_vertices[0][0] <= bullet5_vertices[0][0] && bullet5_vertices[0][0] <= enemy_vertices[1][0])
+            || (enemy_vertices[0][0] <= bullet5_vertices[1][0] && bullet5_vertices[1][0] <= enemy_vertices[1][0])
+            || (enemy_vertices[0][0] <= bullet5_vertices[2][0] && bullet5_vertices[2][0] <= enemy_vertices[1][0]))
+            && ((enemy_vertices[1][1] <= bullet5_vertices[0][1] && bullet5_vertices[0][1] <= enemy_vertices[2][1])
+            || (enemy_vertices[1][1] <= bullet5_vertices[1][1] && bullet5_vertices[1][1] <= enemy_vertices[2][1])
+            || (enemy_vertices[1][1] <= bullet5_vertices[2][1] && bullet5_vertices[2][1] <= enemy_vertices[2][1]))))
+        {
+            delete enemies[i];
+            enemies[i] = nullptr;
+        }
+    }
 }
