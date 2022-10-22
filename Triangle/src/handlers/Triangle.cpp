@@ -51,9 +51,9 @@ namespace handler {
 
         float positions[] = {
             // equilateral triangle at the middle of the window
-            430.0f, (float)(270 - 0.5 * sqrt(100 * 100 - 50 * 50)), 0.0f, 0.0f,             // 0
-            530.0f, (float)(270 - 0.5 * sqrt(100 * 100 - 50 * 50)), 1.0f, 0.0f,             // 1
-            480.0f, (float)(270 + 0.5 * sqrt(100 * 100 - 50 * 50)), 0.5f, (float)sqrt(3)/2  // 2
+            430.0f, (float)(270 - 0.33333 * sqrt(100 * 100 - 50 * 50)), 0.0f, 0.0f,               // 0
+            530.0f, (float)(270 - 0.33333 * sqrt(100 * 100 - 50 * 50)), 1.0f, 0.0f,               // 1
+            480.0f, (float)(270 + 0.66666 * sqrt(100 * 100 - 50 * 50)), 0.5f, (float)sqrt(3) / 2  // 2
         };
 
         unsigned int indices[] = {
@@ -118,9 +118,7 @@ namespace handler {
         {
             glm::mat4 model = glm::translate(glm::mat4(1.0f), m_Translation);
             model = glm::translate(model, glm::vec3(480, 270, 0));
-            model = glm::translate(model, glm::vec3(0, -15, 0));
             model = glm::rotate(model, glm::radians((float)m_Rotation), glm::vec3(0, 0, -1));
-            model = glm::translate(model, glm::vec3(0, 15, 0));
             model = glm::translate(model, glm::vec3(-480, -270, 0));
             glm::mat4 mvp = m_Proj * m_View * model;
             m_MVP = mvp;
@@ -132,12 +130,13 @@ namespace handler {
 
     bool Triangle::OnKeyPress(bool up_pressed, bool left_pressed, bool right_pressed, bool down_pressed, bool q_pressed, bool e_pressed, bool space_pressed)
     {
-        float half_height = (float)(0.5 * sqrt(100 * 100 - 50 * 50));
+        float up_height = (float)(0.66666 * sqrt(100 * 100 - 50 * 50));
+        float down_height = (float)(0.33333 * sqrt(100 * 100 - 50 * 50));
         float half_width = 100 / 2;
 
-        if (up_pressed && m_Translation.y < 270 - half_height)
+        if (up_pressed && m_Translation.y < 270 - up_height)
             m_Translation.y += 10;
-        if (down_pressed && m_Translation.y > -270 + half_height)
+        if (down_pressed && m_Translation.y > -270 + down_height)
             m_Translation.y -= 10;
         if (right_pressed && m_Translation.x < 480 - half_width)
             m_Translation.x += 10;
@@ -169,7 +168,7 @@ namespace handler {
     float Triangle::getVert1x()
     {
         float pos_x = -50;
-        float pos_y = (float)(-0.5 * (float)sqrt(100 * 100 - 50 * 50));
+        float pos_y = (float)(-0.33333 * (float)sqrt(100 * 100 - 50 * 50));
 
         return (pos_x) * cos(glm::radians((float)(-m_Rotation))) - (pos_y) * sin(glm::radians((float)(-m_Rotation))) + m_Translation.x + 480;
     }
@@ -177,7 +176,7 @@ namespace handler {
     float Triangle::getVert1y()
     {
         float pos_x = -50;
-        float pos_y = (float)(-0.5 * (float)sqrt(100 * 100 - 50 * 50));
+        float pos_y = (float)(-0.33333 * (float)sqrt(100 * 100 - 50 * 50));
 
         return (pos_x) * sin(glm::radians((float)(-m_Rotation))) + (pos_y) * cos(glm::radians((float)(-m_Rotation))) + m_Translation.y + 270;
     }
@@ -185,7 +184,7 @@ namespace handler {
     float Triangle::getVert2x()
     {
         float pos_x = 50;
-        float pos_y = (float)(-0.5 * (float)sqrt(100 * 100 - 50 * 50));
+        float pos_y = (float)(-0.33333 * (float)sqrt(100 * 100 - 50 * 50));
 
         return (pos_x) * cos(glm::radians((float)(-m_Rotation))) - (pos_y) * sin(glm::radians((float)(-m_Rotation))) + m_Translation.x + 480;
     }
@@ -193,7 +192,7 @@ namespace handler {
     float Triangle::getVert2y()
     {
         float pos_x = 50;
-        float pos_y = (float)(-0.5 * (float)sqrt(100 * 100 - 50 * 50));
+        float pos_y = (float)(-0.33333 * (float)sqrt(100 * 100 - 50 * 50));
 
         return (pos_x) * sin(glm::radians((float)(-m_Rotation))) + (pos_y) * cos(glm::radians((float)(-m_Rotation))) + m_Translation.y + 270;
     }
@@ -201,7 +200,7 @@ namespace handler {
     float Triangle::getVert3x()
     {
         float pos_x = 0;
-        float pos_y = (float)(0.5 * (float)sqrt(100 * 100 - 50 * 50));
+        float pos_y = (float)(0.66666 * (float)sqrt(100 * 100 - 50 * 50));
 
         return (pos_x) * cos(glm::radians((float)(-m_Rotation))) - (pos_y) * sin(glm::radians((float)(-m_Rotation))) + m_Translation.x + 480;
     }
@@ -209,7 +208,7 @@ namespace handler {
     float Triangle::getVert3y()
     {
         float pos_x = 0;
-        float pos_y = (float)(0.5 * (float)sqrt(100 * 100 - 50 * 50));
+        float pos_y = (float)(0.66666 * (float)sqrt(100 * 100 - 50 * 50));
 
         return (pos_x) * sin(glm::radians((float)(-m_Rotation))) + (pos_y) * cos(glm::radians((float)(-m_Rotation))) + m_Translation.y + 270;
     }
@@ -221,9 +220,9 @@ namespace handler {
         m_BulletTranslation = handler->m_Translation;
 
         float positions[] = {
-            -20.0, -20.0,                      0.0f, 0.0f,               // 0
-             20.0, -20.0,                      1.0f, 0.0f,               // 1
-              0.0,  40 * ((float)sqrt(3) / 2), 0.5f, (float)sqrt(3) / 2  // 2
+            -20.0, -20.0,                              0.0f, 0.0f,               // 0
+             20.0, -20.0,                              1.0f, 0.0f,               // 1
+              0.0, -20.0 + 40 * ((float)sqrt(3) / 2),  0.5f, (float)sqrt(3) / 2  // 2
         };
 
         unsigned int indices[] = {
@@ -264,12 +263,9 @@ namespace handler {
         
         {
             glm::mat4 model = glm::translate(glm::mat4(1.0f), m_BulletTranslation);
-            model = glm::translate(model, glm::vec3(0.0f, -22.0f, 0.0f));
             model = glm::rotate(model, glm::radians(saved_rotation), glm::vec3(0, 0, -1));
-            model = glm::translate(model, glm::vec3(0.0f, 22.0f, 0.0f));
 
             glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(480, 270, 0));
-            //glm::mat4 mvp = handler->m_Proj * handler->m_View * model;
             glm::mat4 mvp = handler->m_Proj * view * model;
 
             m_Shader->Bind();
@@ -287,12 +283,9 @@ namespace handler {
         saved_rotation += handler->m_Rotation;
         {
             glm::mat4 model = glm::translate(glm::mat4(1.0f), m_BulletTranslation);
-            model = glm::translate(model, glm::vec3(0.0f, -22.0f, 0.0f));
             model = glm::rotate(model, glm::radians((float)handler->m_Rotation), glm::vec3(0, 0, -1));
-            model = glm::translate(model, glm::vec3(0.0f, 22.0f, 0.0f));
 
             glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(480, 270, 0));
-            //glm::mat4 mvp = handler->m_Proj * handler->m_View * model;
             glm::mat4 mvp = handler->m_Proj * view * model;
 
             m_Shader->Bind();
@@ -303,32 +296,32 @@ namespace handler {
 
     float Bullet::getVert1x()
     {
-        float pos_x = -50;
-        float pos_y = (float)(-0.5 * (float)sqrt(100 * 100 - 50 * 50));
+        float pos_x = -20;
+        float pos_y = (float)(-0.33333 * (float)sqrt(40 * 40 - 20 * 20));
 
         return (pos_x)*cos(glm::radians((float)(-saved_rotation))) - (pos_y)*sin(glm::radians((float)(-saved_rotation))) + m_BulletTranslation.x + 480;
     }
 
     float Bullet::getVert1y()
     {
-        float pos_x = -50;
-        float pos_y = (float)(-0.5 * (float)sqrt(100 * 100 - 50 * 50));
+        float pos_x = -20;
+        float pos_y = (float)(-0.33333 * (float)sqrt(40 * 40 - 20 * 20));
 
         return (pos_x)*sin(glm::radians((float)(-saved_rotation))) + (pos_y)*cos(glm::radians((float)(-saved_rotation))) + m_BulletTranslation.y + 270;
     }
 
     float Bullet::getVert2x()
     {
-        float pos_x = 50;
-        float pos_y = (float)(-0.5 * (float)sqrt(100 * 100 - 50 * 50));
+        float pos_x = 20;
+        float pos_y = (float)(-0.33333 * (float)sqrt(40 * 40 - 20 * 20));
 
         return (pos_x)*cos(glm::radians((float)(-saved_rotation))) - (pos_y)*sin(glm::radians((float)(-saved_rotation))) + m_BulletTranslation.x + 480;
     }
 
     float Bullet::getVert2y()
     {
-        float pos_x = 50;
-        float pos_y = (float)(-0.5 * (float)sqrt(100 * 100 - 50 * 50));
+        float pos_x = 20;
+        float pos_y = (float)(-0.33333 * (float)sqrt(40 * 40 - 20 * 20));
 
         return (pos_x)*sin(glm::radians((float)(-saved_rotation))) + (pos_y)*cos(glm::radians((float)(-saved_rotation))) + m_BulletTranslation.y + 270;
     }
@@ -336,7 +329,7 @@ namespace handler {
     float Bullet::getVert3x()
     {
         float pos_x = 0;
-        float pos_y = (float)(0.5 * (float)sqrt(100 * 100 - 50 * 50));
+        float pos_y = (float)(0.66666 * (float)sqrt(40 * 40 - 20 * 20));
 
         return (pos_x)*cos(glm::radians((float)(-saved_rotation))) - (pos_y)*sin(glm::radians((float)(-saved_rotation))) + m_BulletTranslation.x + 480;
     }
@@ -344,7 +337,7 @@ namespace handler {
     float Bullet::getVert3y()
     {
         float pos_x = 0;
-        float pos_y = (float)(0.5 * (float)sqrt(100 * 100 - 50 * 50));
+        float pos_y = (float)(0.66666 * (float)sqrt(40 * 40 - 20 * 20));
 
         return (pos_x)*sin(glm::radians((float)(-saved_rotation))) + (pos_y)*cos(glm::radians((float)(-saved_rotation))) + m_BulletTranslation.y + 270;
     }

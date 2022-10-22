@@ -542,6 +542,8 @@ void check_collisions(handler::Triangle* triangle, handler::Bullet* bullets[])
     }
 
     //std::cout << "Triangle vertex #0: x: " << triangle_vertices[0][0] << ", y: " << triangle_vertices[0][1] << std::endl;
+    //std::cout << "Triangle vertex #1: x: " << triangle_vertices[1][0] << ", y: " << triangle_vertices[1][1] << std::endl;
+    //std::cout << "Triangle vertex #2: x: " << triangle_vertices[2][0] << ", y: " << triangle_vertices[2][1] << std::endl;
 
     for (int i = 0; i < triangle->num_enemies; i++)
     {
@@ -552,19 +554,6 @@ void check_collisions(handler::Triangle* triangle, handler::Bullet* bullets[])
                                        {enemies[i]->getVert2x(), enemies[i]->getVert2y()},
                                        {enemies[i]->getVert3x(), enemies[i]->getVert3y()},
                                        {enemies[i]->getVert4x(), enemies[i]->getVert4y()} };
-
-        if (((enemy_vertices[0][0] <= triangle_vertices[0][0] && triangle_vertices[0][0] <= enemy_vertices[1][0])
-            || (enemy_vertices[0][0] <= triangle_vertices[1][0] && triangle_vertices[1][0] <= enemy_vertices[1][0])
-            || (enemy_vertices[0][0] <= triangle_vertices[2][0] && triangle_vertices[2][0] <= enemy_vertices[1][0]))
-            && ((enemy_vertices[1][1] <= triangle_vertices[0][1] && triangle_vertices[0][1] <= enemy_vertices[2][1])
-            || (enemy_vertices[1][1] <= triangle_vertices[1][1] && triangle_vertices[1][1] <= enemy_vertices[2][1])
-            || (enemy_vertices[1][1] <= triangle_vertices[2][1] && triangle_vertices[2][1] <= enemy_vertices[2][1])))
-        {
-            //std::cout << "BOOM! Vertex: X: " << enemies[i]->getVert1x() << ", Y : " << enemies[i]->getVert1y() << std::endl;
-            end_game = true;
-            killer = i;
-            return;
-        }
 
 
         if ((((enemy_vertices[0][0] <= bullet0_vertices[0][0] && bullet0_vertices[0][0] <= enemy_vertices[1][0])
@@ -606,6 +595,30 @@ void check_collisions(handler::Triangle* triangle, handler::Bullet* bullets[])
         {
             delete enemies[i];
             enemies[i] = nullptr;
+            continue;
+        }
+
+        if (((enemy_vertices[0][0] <= triangle_vertices[0][0] && triangle_vertices[0][0] <= enemy_vertices[1][0])
+            && (enemy_vertices[1][1] <= triangle_vertices[0][1] && triangle_vertices[0][1] <= enemy_vertices[2][1]))
+            || ((enemy_vertices[0][0] <= triangle_vertices[1][0] && triangle_vertices[1][0] <= enemy_vertices[1][0])
+            && (enemy_vertices[1][1] <= triangle_vertices[1][1] && triangle_vertices[1][1] <= enemy_vertices[2][1]))
+            || ((enemy_vertices[0][0] <= triangle_vertices[2][0] && triangle_vertices[2][0] <= enemy_vertices[1][0])
+            && (enemy_vertices[1][1] <= triangle_vertices[2][1] && triangle_vertices[2][1] <= enemy_vertices[2][1])))
+        {
+            /*
+            std::cout << "Enemy vertex 1: x: " << enemies[i]->getVert1x() << ", y: " << enemies[i]->getVert1y() << std::endl;
+            std::cout << "Enemy vertex 2: x: " << enemies[i]->getVert2x() << ", y: " << enemies[i]->getVert2y() << std::endl;
+            std::cout << "Enemy vertex 3: x: " << enemies[i]->getVert3x() << ", y: " << enemies[i]->getVert3y() << std::endl;
+            std::cout << "Enemy vertex 4: x: " << enemies[i]->getVert4x() << ", y: " << enemies[i]->getVert4y() << std::endl;
+
+            std::cout << "Triangle vertex 1: x: " << triangle->getVert1x() << ", y: " << triangle->getVert1y() << std::endl;
+            std::cout << "Triangle vertex 2: x: " << triangle->getVert2x() << ", y: " << triangle->getVert2y() << std::endl;
+            std::cout << "Triangle vertex 3: x: " << triangle->getVert3x() << ", y: " << triangle->getVert3y() << std::endl;
+            */
+
+            end_game = true;
+            killer = i;
+            return;
         }
     }
 }

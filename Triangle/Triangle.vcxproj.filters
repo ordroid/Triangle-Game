@@ -453,10 +453,10 @@
     <Image Include="res\textures\EnemyBurning.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="res\textures\TriangleBurning.png">
+    <Image Include="res\textures\Gameoverinstructions.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="res\textures\Gameoverinstructions.png">
+    <Image Include="res\textures\TriangleBurning.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

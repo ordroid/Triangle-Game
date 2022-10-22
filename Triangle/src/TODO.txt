@@ -1,2 +1,2 @@
 1. Show score when the game ends.
-2. Adjust collisions.
+2. Add second type of collisions.
