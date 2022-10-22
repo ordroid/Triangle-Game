@@ -447,6 +447,15 @@
     <Image Include="res\textures\Instructions2.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="res\textures\Gameover.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\textures\EnemyBurning.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\textures\TriangleBurning.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\vendor\stb_image\stb_image.cpp">

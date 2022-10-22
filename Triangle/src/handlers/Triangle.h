@@ -22,6 +22,7 @@ namespace handler {
 		void OnRender() override;
 
 		bool OnKeyPress(bool up_pressed, bool left_pressed, bool right_pressed, bool down_pressed, bool q_pressed, bool e_pressed, bool space_pressed);
+		void OnBurn();
 
 	private:
 		std::unique_ptr<VertexArray> m_VAO;
@@ -106,6 +107,8 @@ namespace handler {
 		void OnUpdate(float deltaTime) override;
 		void OnRender() override;
 
+		void OnBurn();
+
 	private:
 		std::unique_ptr<VertexArray> m_VAO;
 		std::unique_ptr<VertexBuffer> m_VertexBuffer;
@@ -131,6 +134,8 @@ namespace handler {
 		float getVert3y();
 		float getVert4x();
 		float getVert4y();
+
+		void stopMotion();
 	};
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -181,6 +186,29 @@ namespace handler {
 		std::unique_ptr<IndexBuffer> m_IndexBuffer2;
 		std::unique_ptr<Shader> m_Shader2;
 		std::unique_ptr<Texture> m_Texture2;
+
+		glm::mat4 m_Proj;
+		glm::mat4 m_View;
+		glm::vec3 m_Translation;
+	};
+
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	class Gameover : public Handler
+	{
+	public:
+		Gameover();
+		~Gameover();
+
+		void OnUpdate(float deltaTime) override;
+		void OnRender() override;
+
+	private:
+		std::unique_ptr<VertexArray> m_VAO;
+		std::unique_ptr<VertexBuffer> m_VertexBuffer;
+		std::unique_ptr<IndexBuffer> m_IndexBuffer;
+		std::unique_ptr<Shader> m_Shader;
+		std::unique_ptr<Texture> m_Texture;
 
 		glm::mat4 m_Proj;
 		glm::mat4 m_View;

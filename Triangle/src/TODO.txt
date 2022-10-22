@@ -1,4 +1,3 @@
-1. Add burning animation?
-2. Output the score after the game ends.
-3. Show background on instructions screen.
-4. Adjust collisions.
+1. Output the score after the game ends.
+2. Adjust collisions.
+3. Start a new game after it ends.

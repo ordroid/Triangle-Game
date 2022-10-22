@@ -275,10 +275,13 @@
     <Image Include="res\textures\Background.png" />
     <Image Include="res\textures\Bullet.png" />
     <Image Include="res\textures\Enemy.png" />
+    <Image Include="res\textures\EnemyBurning.png" />
+    <Image Include="res\textures\Gameover.jpg" />
     <Image Include="res\textures\Instructions.png" />
     <Image Include="res\textures\Instructions2.png" />
     <Image Include="res\textures\Levelup.png" />
     <Image Include="res\textures\Triangle.png" />
+    <Image Include="res\textures\TriangleBurning.png" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Application.cpp" />

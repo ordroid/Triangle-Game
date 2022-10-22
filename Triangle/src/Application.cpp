@@ -35,7 +35,11 @@ bool down_pressed = false;
 bool q_pressed = false;
 bool e_pressed = false;
 bool space_pressed = false;
+bool n_pressed = false;
+bool b_pressed = false;
 bool enter_pressed = false;
+bool end_game = false;
+int killer = -1;
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void instructions_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void check_collisions(handler::Triangle* triangle, handler::Bullet* bullets[]);
@@ -69,7 +73,7 @@ int main(void)
     if (glewInit() != GLEW_OK)
         std::cout << "Error!" << std::endl;
 
-    std::cout << glGetString(GL_VERSION) << std::endl;
+    //std::cout << glGetString(GL_VERSION) << std::endl;
     {
 
         GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
@@ -96,7 +100,17 @@ int main(void)
         bool show = false;
         int show_count = 0;
 
+        handler::Gameover* gameover;
+        gameover = nullptr;
+        bool just_ended = true;
+        auto end_time = std::chrono::system_clock::now();
+        bool ended_two_seconds_ago = false;
+
         long long current_speed = 3;
+
+        bool* already_shot = new bool[sizeof(bool) * handler->num_enemies];
+        for (int i = 0; i < handler->num_enemies; i++)
+            already_shot[i] = false;
 
         int loop_instructions = 0;
         auto start_time = std::chrono::system_clock::now();
@@ -116,9 +130,11 @@ int main(void)
 
             if (!instructions->OnKeyPress(enter_pressed))
             {
+                handler->OnRender();
                 instructions->OnRender();
+                start_time = std::chrono::system_clock::now();
             }
-            else
+            else if(!end_game)
             {
                 handler->OnRender();
 
@@ -222,8 +238,9 @@ int main(void)
                 {
                     for (int i = 0; i < handler->num_enemies; i++)
                     {
-                        if (handler->enemies[i] == nullptr)
+                        if (!handler->enemies[i] && !already_shot[i])
                         {
+                            already_shot[i] = true;
                             handler->enemies[i] = new handler::Enemy(current_speed);
                             handler->enemies[i]->OnRender();
                             last_enemy = std::chrono::system_clock::now();
@@ -241,6 +258,7 @@ int main(void)
                             {
                                 delete handler->enemies[j];
                                 handler->enemies[j] = nullptr;
+                                already_shot[j] = false;
                             }
                             current_speed += 2;
                         }
@@ -254,6 +272,72 @@ int main(void)
                 }
 
                 check_collisions(handler, bullets);
+            }
+
+            if (end_game)
+            {
+                if (just_ended)
+                {
+                    end_time = std::chrono::system_clock::now();
+                    gameover = new handler::Gameover();
+                    handler->OnBurn();
+                    handler->enemies[killer]->OnBurn();
+                    handler->enemies[killer]->stopMotion();
+                    just_ended = false;
+                }
+
+                if (ended_two_seconds_ago)
+                {
+                    gameover->OnRender();
+                }
+                else
+                {
+                    handler->OnRender();
+                    handler->enemies[killer]->OnUpdate(0.0f);
+                    auto now_burning = std::chrono::system_clock::now();
+                    std::chrono::duration<double> burning_time = now_burning - end_time;
+                    if (burning_time.count() >= 2)
+                        ended_two_seconds_ago = true;
+                }
+
+                std::chrono::duration<double> game_time = end_time - start_time;
+
+                std::cout << "GAME OVER!\nGame time: " << game_time.count() << std::endl;
+                
+                auto wait_time = std::chrono::system_clock::now();
+                std::chrono::duration<double> wait_duration = wait_time - end_time;
+
+                if (wait_duration.count() < 10)
+                {
+                    if(ended_two_seconds_ago)
+                        gameover->OnUpdate(0.0f);
+                    wait_time = std::chrono::system_clock::now();
+                    wait_duration = wait_time - end_time;
+                }
+                else
+                {
+                    break;
+                }
+
+                /*
+                glfwSetKeyCallback(window, key_callback);
+                while (glfwSetKeyCallback(window, key_callback))
+                {
+                    auto wait_time = std::chrono::system_clock::now();
+                    if (b_pressed)
+                        break;
+                    std::chrono::duration<double> wait_duration = wait_time - end_time;
+
+                    while (wait_duration.count() < 5)
+                    {
+                        wait_time = std::chrono::system_clock::now();
+                        wait_duration = wait_time - end_time;
+                    }
+
+                }
+                if (b_pressed)
+                    break;
+                    */
             }
 
             /* Swap front and back buffers */
@@ -275,6 +359,9 @@ int main(void)
 
         if (instructions)
             delete instructions;
+
+        if (gameover)
+            delete gameover;
 
         for (int i = 0; i < handler->num_enemies; i++)
         {
@@ -322,6 +409,14 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         space_pressed = true;
     else if (key == GLFW_KEY_SPACE && action == GLFW_RELEASE)
         space_pressed = false;
+    else if (key == GLFW_KEY_N && action == GLFW_PRESS)
+        n_pressed = true;
+    else if (key == GLFW_KEY_N && action == GLFW_RELEASE)
+        n_pressed = false;
+    else if (key == GLFW_KEY_B && action == GLFW_PRESS)
+        b_pressed = true;
+    else if (key == GLFW_KEY_B && action == GLFW_RELEASE)
+        b_pressed = false;
 }
 
 void instructions_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -416,7 +511,7 @@ void check_collisions(handler::Triangle* triangle, handler::Bullet* bullets[])
         }
     }
 
-    //std::cout << "Triangle vertex #0: x: " << triangle_vertices[0][0] << ", y: " << triangle_vertices[0][1] << std::endl;
+    std::cout << "Triangle vertex #0: x: " << triangle_vertices[0][0] << ", y: " << triangle_vertices[0][1] << std::endl;
 
     for (int i = 0; i < triangle->num_enemies; i++)
     {
@@ -436,8 +531,9 @@ void check_collisions(handler::Triangle* triangle, handler::Bullet* bullets[])
             || (enemy_vertices[1][1] <= triangle_vertices[2][1] && triangle_vertices[2][1] <= enemy_vertices[2][1])))
         {
             //std::cout << "BOOM! Vertex: X: " << enemies[i]->getVert1x() << ", Y : " << enemies[i]->getVert1y() << std::endl;
-            delete enemies[i];
-            enemies[i] = nullptr;
+            end_game = true;
+            killer = i;
+            return;
         }
 
 
