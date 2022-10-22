@@ -277,6 +277,7 @@
     <Image Include="res\textures\Enemy.png" />
     <Image Include="res\textures\EnemyBurning.png" />
     <Image Include="res\textures\Gameover.jpg" />
+    <Image Include="res\textures\Gameoverinstructions.png" />
     <Image Include="res\textures\Instructions.png" />
     <Image Include="res\textures\Instructions2.png" />
     <Image Include="res\textures\Levelup.png" />

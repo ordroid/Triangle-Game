@@ -671,13 +671,25 @@ namespace handler {
                            m_Translation(0, 0, 0)
     {
         float positions[] = {
-             400.0f, 230.0f, 0.0f, 0.0f,  // 0
-             560.0f, 230.0f, 1.0f, 0.0f,  // 1
-             560.0f, 310.0f, 1.0f, 1.0f,  // 2
-             400.0f, 310.0f, 0.0f, 1.0f   // 3
+             390.0f, 230.0f, 0.0f, 0.0f,  // 0
+             570.0f, 230.0f, 1.0f, 0.0f,  // 1
+             570.0f, 310.0f, 1.0f, 1.0f,  // 2
+             390.0f, 310.0f, 0.0f, 1.0f   // 3
+        };
+
+        float inst_positions[] = {
+            390.0f, 150.0f, 0.0f, 0.0f,  // 0
+            570.0f, 150.0f, 1.0f, 0.0f,  // 1
+            570.0f, 230.0f, 1.0f, 1.0f,  // 2
+            390.0f, 230.0f, 0.0f, 1.0f   // 3
         };
 
         unsigned int indices[] = {
+            0, 1, 2,
+            2, 3, 0
+        };
+
+        unsigned int inst_indices[] = {
             0, 1, 2,
             2, 3, 0
         };
@@ -686,20 +698,37 @@ namespace handler {
         GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
         m_VAO = std::make_unique<VertexArray>();
+        m_inst_VAO = std::make_unique<VertexArray>();
 
         m_VertexBuffer = std::make_unique<VertexBuffer>(positions, 4 * 4 * sizeof(float));
+        m_inst_VertexBuffer = std::make_unique<VertexBuffer>(inst_positions, 4 * 4 * sizeof(float));
+
         VertexBufferLayout layout;
         layout.Push<float>(2);
         layout.Push<float>(2);
 
+        VertexBufferLayout inst_layout;
+        inst_layout.Push<float>(2);
+        inst_layout.Push<float>(2);
+
+
         m_VAO->AddBuffer(*m_VertexBuffer, layout);
         m_IndexBuffer = std::make_unique<IndexBuffer>(indices, 6);
+
+        m_inst_VAO->AddBuffer(*m_inst_VertexBuffer, inst_layout);
+        m_inst_IndexBuffer = std::make_unique<IndexBuffer>(inst_indices, 6);
 
         m_Shader = std::make_unique<Shader>("res/shaders/Basic.shader");
         m_Shader->Bind();
 
+        m_inst_Shader = std::make_unique<Shader>("res/shaders/Basic.shader");
+        m_inst_Shader->Bind();
+
         m_Texture = std::make_unique<Texture>("res/textures/Gameover.jpg");
+        m_inst_Texture = std::make_unique<Texture>("res/textures/Gameoverinstructions.png");
+
         m_Shader->SetUniform1i("u_Texture", 0);
+        m_inst_Shader->SetUniform1i("u_Texture", 0);
     }
 
     Gameover::~Gameover()
@@ -718,6 +747,17 @@ namespace handler {
             m_Shader->SetUniformMat4f("u_MVP", mvp);
             renderer.Draw(*m_VAO, *m_IndexBuffer, *m_Shader);
         }
+
+        Renderer inst_renderer;
+        m_inst_Texture->Bind();
+
+        {
+            glm::mat4 model = glm::translate(glm::mat4(1.0f), m_Translation);
+            glm::mat4 mvp = m_Proj * m_View * model;
+            m_inst_Shader->Bind();
+            m_inst_Shader->SetUniformMat4f("u_MVP", mvp);
+            inst_renderer.Draw(*m_inst_VAO, *m_inst_IndexBuffer, *m_inst_Shader);
+        }
     }
 
     void Gameover::OnRender()
@@ -732,5 +772,17 @@ namespace handler {
             m_Shader->SetUniformMat4f("u_MVP", mvp);
             renderer.Draw(*m_VAO, *m_IndexBuffer, *m_Shader);
         }
+
+        Renderer inst_renderer;
+        m_inst_Texture->Bind();
+
+        {
+            glm::mat4 model = glm::translate(glm::mat4(1.0f), m_Translation);
+            glm::mat4 mvp = m_Proj * m_View * model;
+            m_inst_Shader->Bind();
+            m_inst_Shader->SetUniformMat4f("u_MVP", mvp);
+            inst_renderer.Draw(*m_inst_VAO, *m_inst_IndexBuffer, *m_inst_Shader);
+        }
+
     }
 }

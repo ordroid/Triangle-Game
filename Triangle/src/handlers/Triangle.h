@@ -210,6 +210,12 @@ namespace handler {
 		std::unique_ptr<Shader> m_Shader;
 		std::unique_ptr<Texture> m_Texture;
 
+		std::unique_ptr<VertexArray> m_inst_VAO;
+		std::unique_ptr<VertexBuffer> m_inst_VertexBuffer;
+		std::unique_ptr<IndexBuffer> m_inst_IndexBuffer;
+		std::unique_ptr<Shader> m_inst_Shader;
+		std::unique_ptr<Texture> m_inst_Texture;
+
 		glm::mat4 m_Proj;
 		glm::mat4 m_View;
 		glm::vec3 m_Translation;

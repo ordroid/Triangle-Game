@@ -1,3 +1,2 @@
-1. Output the score after the game ends.
+1. Show score when the game ends.
 2. Adjust collisions.
-3. Start a new game after it ends.

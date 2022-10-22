@@ -36,10 +36,11 @@ bool q_pressed = false;
 bool e_pressed = false;
 bool space_pressed = false;
 bool n_pressed = false;
-bool b_pressed = false;
+bool esc_pressed = false;
 bool enter_pressed = false;
 bool end_game = false;
 int killer = -1;
+bool start_game = true;
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void instructions_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void check_collisions(handler::Triangle* triangle, handler::Bullet* bullets[]);
@@ -136,6 +137,55 @@ int main(void)
             }
             else if(!end_game)
             {
+
+                if (start_game)
+                {
+                    start_game = false;
+                    end_game = false;
+
+                    delete handler;
+                    delete lvl;
+                    delete gameover;
+                    delete[] already_shot;
+
+                    handler = new handler::Triangle();
+                    shoot = false;
+                    exists = 0;
+                    rendered_first = false;
+                    rendered_second = false;
+
+                    handler::Bullet* bullets[6]{};
+                    for (int i = 0; i < 6; i++)
+                    {
+                        if(bullets[i])
+                            delete bullets[i];
+                        bullets[i] = nullptr;
+                    }
+                    shooting = 0;
+
+                    lvl = nullptr;
+                    show = false;
+                    show_count = 0;
+
+                    gameover = nullptr;
+                    just_ended = true;
+                    end_time = std::chrono::system_clock::now();
+                    ended_two_seconds_ago = false;
+
+                    current_speed = 3;
+
+                    already_shot = new bool[sizeof(bool) * handler->num_enemies];
+                    for (int i = 0; i < handler->num_enemies; i++)
+                        already_shot[i] = false;
+
+                    loop_instructions = 0;
+                    start_time = std::chrono::system_clock::now();
+
+                    last_enemy = std::chrono::system_clock::now();
+
+                    start = std::chrono::system_clock::now();
+                }
+
                 handler->OnRender();
 
                 glfwSetKeyCallback(window, key_callback);
@@ -304,40 +354,20 @@ int main(void)
 
                 std::cout << "GAME OVER!\nGame time: " << game_time.count() << std::endl;
                 
-                auto wait_time = std::chrono::system_clock::now();
-                std::chrono::duration<double> wait_duration = wait_time - end_time;
 
-                if (wait_duration.count() < 10)
-                {
-                    if(ended_two_seconds_ago)
-                        gameover->OnUpdate(0.0f);
-                    wait_time = std::chrono::system_clock::now();
-                    wait_duration = wait_time - end_time;
-                }
-                else
-                {
-                    break;
-                }
-
-                /*
                 glfwSetKeyCallback(window, key_callback);
-                while (glfwSetKeyCallback(window, key_callback))
-                {
-                    auto wait_time = std::chrono::system_clock::now();
-                    if (b_pressed)
-                        break;
-                    std::chrono::duration<double> wait_duration = wait_time - end_time;
 
-                    while (wait_duration.count() < 5)
-                    {
-                        wait_time = std::chrono::system_clock::now();
-                        wait_duration = wait_time - end_time;
-                    }
-
-                }
-                if (b_pressed)
+                if (esc_pressed)
                     break;
-                    */
+
+                if (n_pressed)
+                {
+                    start_game = true;
+                    end_game = false;
+                }
+
+                if(ended_two_seconds_ago)
+                    gameover->OnUpdate(0.0f);
             }
 
             /* Swap front and back buffers */
@@ -413,10 +443,10 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         n_pressed = true;
     else if (key == GLFW_KEY_N && action == GLFW_RELEASE)
         n_pressed = false;
-    else if (key == GLFW_KEY_B && action == GLFW_PRESS)
-        b_pressed = true;
-    else if (key == GLFW_KEY_B && action == GLFW_RELEASE)
-        b_pressed = false;
+    else if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+        esc_pressed = true;
+    else if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE)
+        esc_pressed = false;
 }
 
 void instructions_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -511,7 +541,7 @@ void check_collisions(handler::Triangle* triangle, handler::Bullet* bullets[])
         }
     }
 
-    std::cout << "Triangle vertex #0: x: " << triangle_vertices[0][0] << ", y: " << triangle_vertices[0][1] << std::endl;
+    //std::cout << "Triangle vertex #0: x: " << triangle_vertices[0][0] << ", y: " << triangle_vertices[0][1] << std::endl;
 
     for (int i = 0; i < triangle->num_enemies; i++)
     {
