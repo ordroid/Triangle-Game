@@ -220,9 +220,9 @@ namespace handler {
         m_BulletTranslation = handler->m_Translation;
 
         float positions[] = {
-            -20.0, -20.0,                              0.0f, 0.0f,               // 0
-             20.0, -20.0,                              1.0f, 0.0f,               // 1
-              0.0, -20.0 + 40 * ((float)sqrt(3) / 2),  0.5f, (float)sqrt(3) / 2  // 2
+            -20.0, -20.0,                                        0.0f, 0.0f,               // 0
+             20.0, -20.0,                                        1.0f, 0.0f,               // 1
+              0.0, (float) (-20.0 + 40) * ((float)sqrt(3) / 2),  0.5f, (float)sqrt(3) / 2  // 2
         };
 
         unsigned int indices[] = {
