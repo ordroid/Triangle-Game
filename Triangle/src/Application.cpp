@@ -99,7 +99,7 @@ int main(void)
         int shooting = 0;
 
         handler::Levelup* lvl = nullptr;
-        bool show = false;
+        bool show_lvlup = false;
         int show_count = 0;
 
         handler::Gameover* gameover;
@@ -170,7 +170,7 @@ int main(void)
                     shooting = 0;
 
                     lvl = nullptr;
-                    show = false;
+                    show_lvlup = false;
                     show_count = 0;
 
                     gameover = nullptr;
@@ -201,8 +201,8 @@ int main(void)
                 glfwSetKeyCallback(window, key_callback);
 
                 shoot = handler->OnKeyPress(up_pressed, left_pressed, right_pressed, down_pressed, q_pressed, e_pressed, space_pressed);
-
-                if (shoot && exists < 2)
+                
+                if (shoot && exists  == 0)
                 {
                     bullets[0 + shooting] = new handler::Bullet(handler);
                     bullets[1 + shooting] = new handler::Bullet(handler, 120.0f);
@@ -218,6 +218,29 @@ int main(void)
                         rendered_second = false;
 
                     shooting = 3 - shooting;
+                }
+                else if (shoot && exists == 1)
+                {
+                    auto time_second_shot = std::chrono::system_clock::now();
+                    std::chrono::duration<double> time_from_first_show = time_second_shot - start;
+
+                    if (time_from_first_show.count() >= 0.3)
+                    {
+                        bullets[0 + shooting] = new handler::Bullet(handler);
+                        bullets[1 + shooting] = new handler::Bullet(handler, 120.0f);
+                        bullets[2 + shooting] = new handler::Bullet(handler, 240.0f);
+
+                        start = std::chrono::system_clock::now();
+
+                        exists++;
+
+                        if (shooting == 0)
+                            rendered_first = false;
+                        else
+                            rendered_second = false;
+
+                        shooting = 3 - shooting;
+                    }
                 }
                 else
                 {
@@ -280,7 +303,7 @@ int main(void)
                         rendered_second = true;
                 }
 
-                if (show)
+                if (show_lvlup)
                 {
                     lvl->OnUpdate(0.0f);
                     show_count++;
@@ -288,7 +311,7 @@ int main(void)
 
                 if (show_count == 30)
                 {
-                    show = false;
+                    show_lvlup = false;
                     show_count = 0;
                 }
 
@@ -311,7 +334,7 @@ int main(void)
                         {
                             lvl = new handler::Levelup();
                             lvl->OnRender();
-                            show = true;
+                            show_lvlup = true;
                             show_count = 0;
 
                             for (int j = 0; j < handler->num_enemies; j++)
