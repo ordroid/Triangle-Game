@@ -1,2 +1,2 @@
 1. Show score when the game ends.
-2. Add second type of collisions.
+2. Fix bug of shooting two sets of arrows at the start of the game.

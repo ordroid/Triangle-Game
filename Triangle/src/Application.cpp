@@ -27,6 +27,7 @@
 
 
 #define UNINITIALIZED -1000.0f
+#define CHECK_COLLISIONS true
 
 bool up_pressed = false;
 bool left_pressed = false;
@@ -40,7 +41,7 @@ bool esc_pressed = false;
 bool enter_pressed = false;
 bool end_game = false;
 int killer = -1;
-bool start_game = true;
+bool start_game = false;
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void instructions_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void check_collisions(handler::Triangle* triangle, handler::Bullet* bullets[]);
@@ -113,6 +114,10 @@ int main(void)
         for (int i = 0; i < handler->num_enemies; i++)
             already_shot[i] = false;
 
+        bool* enemy_shown = new bool[sizeof(bool) * handler->num_enemies];
+        for (int i = 0; i < handler->num_enemies; i++)
+            enemy_shown[i] = false;
+
         int loop_instructions = 0;
         auto start_time = std::chrono::system_clock::now();
 
@@ -147,6 +152,7 @@ int main(void)
                     delete lvl;
                     delete gameover;
                     delete[] already_shot;
+                    delete[] enemy_shown;
 
                     handler = new handler::Triangle();
                     shoot = false;
@@ -177,6 +183,10 @@ int main(void)
                     already_shot = new bool[sizeof(bool) * handler->num_enemies];
                     for (int i = 0; i < handler->num_enemies; i++)
                         already_shot[i] = false;
+
+                    enemy_shown = new bool[sizeof(bool) * handler->num_enemies];
+                    for (int i = 0; i < handler->num_enemies; i++)
+                        enemy_shown[i] = false;
 
                     loop_instructions = 0;
                     start_time = std::chrono::system_clock::now();
@@ -318,7 +328,28 @@ int main(void)
                 for (int i = 0; i < handler->num_enemies; i++)
                 {
                     if (handler->enemies[i])
+                    {
                         handler->enemies[i]->OnUpdate(0.0f);
+
+                        if (enemy_shown[i])
+                        {
+                            if (handler->enemies[i]->getVert1x() > 960
+                                || handler->enemies[i]->getVert2x() < 0
+                                || handler->enemies[i]->getVert1y() > 540
+                                || handler->enemies[i]->getVert3y() < 0)
+                            { // out of window
+                                delete handler->enemies[i];
+                                handler->enemies[i] = nullptr;
+                                enemy_shown[i] = false;
+                            }
+                        }
+                        else
+                        {
+                            if (((handler->enemies[i]->getVert1x() > 0) && (handler->enemies[i]->getVert1x() < 960))
+                                && ((handler->enemies[i]->getVert1y() > 0) && (handler->enemies[i]->getVert1y() < 540)))
+                                enemy_shown[i] = true;
+                        }
+                    }
                 }
 
                 check_collisions(handler, bullets);
@@ -399,6 +430,13 @@ int main(void)
                 delete handler->enemies[i];
         }
 
+        if (already_shot)
+            delete[] already_shot;
+
+
+        if (enemy_shown)
+            delete[] enemy_shown;
+
         if (handler)
             delete handler;
 
@@ -458,8 +496,6 @@ void instructions_callback(GLFWwindow* window, int key, int scancode, int action
 void check_collisions(handler::Triangle* triangle, handler::Bullet* bullets[])
 {
     handler::Enemy** enemies = triangle->enemies;
-
-    // Collision of Triangle and Enemies:
 
     float triangle_vertices[3][2] = { {triangle->getVert1x(), triangle->getVert1y()},
                                       {triangle->getVert2x(), triangle->getVert2y()},
@@ -616,9 +652,30 @@ void check_collisions(handler::Triangle* triangle, handler::Bullet* bullets[])
             std::cout << "Triangle vertex 3: x: " << triangle->getVert3x() << ", y: " << triangle->getVert3y() << std::endl;
             */
 
-            end_game = true;
+            end_game = CHECK_COLLISIONS;
             killer = i;
             return;
+        }
+
+        float inner_circle_radius = (1.0f / 3.0f) * (float)sqrt(100 * 100 - 50 * 50);
+        float center_triangle_x = triangle_vertices[2][0] - (float)sin(glm::radians(triangle->getRotation())) * ((2.0f / 3.0f) * (float)sqrt(100 * 100 - 50 * 50));
+        float center_triangle_y = triangle_vertices[2][1] - (float)cos(glm::radians(triangle->getRotation())) * ((2.0f / 3.0f) * (float)sqrt(100 * 100 - 50 * 50));
+        float center_triangle[2] = { center_triangle_x, center_triangle_y };
+
+        //std::cout << "Center: x: " << center_triangle[0] << " y: " << center_triangle[1] << std::endl;
+
+        if (((std::abs(enemy_vertices[0][0] - center_triangle[0]) <= inner_circle_radius)
+            && (std::abs(enemy_vertices[0][1] - center_triangle[1]) <= inner_circle_radius))
+            || ((std::abs(enemy_vertices[1][0] - center_triangle[0]) <= inner_circle_radius)
+            && (std::abs(enemy_vertices[1][1] - center_triangle[1]) <= inner_circle_radius))
+            || ((std::abs(enemy_vertices[2][0] - center_triangle[0]) <= inner_circle_radius)
+            && (std::abs(enemy_vertices[2][1] - center_triangle[1]) <= inner_circle_radius))
+            || ((std::abs(enemy_vertices[3][0] - center_triangle[0]) <= inner_circle_radius)
+            && (std::abs(enemy_vertices[3][1] - center_triangle[1]) <= inner_circle_radius)))
+        {
+            end_game = CHECK_COLLISIONS;
+            killer = i;
+            return;          
         }
     }
 }
