@@ -1,2 +1,3 @@
-1. Show score when the game ends.
-2. Add image to exe icon and make it work as a standalone file.
+1. Add image to exe icon and make it work as a standalone file.
+2. Fix bug of shooting two sets of bullets at the start of the game.
+3. Adjust the place of the timer.

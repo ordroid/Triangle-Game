@@ -79,7 +79,7 @@
       <AdditionalIncludeDirectories>src;src\vendor;$(SolutionDir)Dependencies\GLFW\include;$(SolutionDir)Dependencies\GLEW\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\GLFW\lib-vc2022;$(SolutionDir)Dependencies\GLEW\lib\Release\Win32</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3.lib;opengl32.lib;User32.lib;Gdi32.lib;Shell32.lib;glew32s.lib</AdditionalDependencies>
@@ -97,7 +97,7 @@
       <AdditionalIncludeDirectories>src;src\vendor;$(SolutionDir)Dependencies\GLFW\include;$(SolutionDir)Dependencies\GLEW\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -274,8 +274,19 @@
     <None Include="src\vendor\glm\gtx\wrap.inl" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\icon\Triangle.ico" />
     <Image Include="res\textures\Background.png" />
     <Image Include="res\textures\Bullet.png" />
+    <Image Include="res\textures\digits\0.png" />
+    <Image Include="res\textures\digits\1.png" />
+    <Image Include="res\textures\digits\2.png" />
+    <Image Include="res\textures\digits\3.png" />
+    <Image Include="res\textures\digits\4.png" />
+    <Image Include="res\textures\digits\5.png" />
+    <Image Include="res\textures\digits\6.png" />
+    <Image Include="res\textures\digits\7.png" />
+    <Image Include="res\textures\digits\8.png" />
+    <Image Include="res\textures\digits\9.png" />
     <Image Include="res\textures\Enemy.png" />
     <Image Include="res\textures\EnemyBurning.png" />
     <Image Include="res\textures\Gameover.jpg" />
@@ -283,6 +294,7 @@
     <Image Include="res\textures\Instructions.png" />
     <Image Include="res\textures\Instructions2.png" />
     <Image Include="res\textures\Levelup.png" />
+    <Image Include="res\textures\Timesurvived.png" />
     <Image Include="res\textures\Triangle.png" />
     <Image Include="res\textures\TriangleBurning.png" />
   </ItemGroup>
@@ -303,6 +315,7 @@
     <ClCompile Include="src\VertexBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="resource.h" />
     <ClInclude Include="src\handlers\Handler.h" />
     <ClInclude Include="src\IndexBuffer.h" />
     <ClInclude Include="src\Renderer.h" />
@@ -605,6 +618,9 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="src\TODO.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Triangle.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -215,7 +215,7 @@ namespace handler {
 
     float Triangle::getRotation()
     {
-        return m_Rotation;
+        return (float)m_Rotation;
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -780,6 +780,121 @@ namespace handler {
             m_inst_Shader->Bind();
             m_inst_Shader->SetUniformMat4f("u_MVP", mvp);
             inst_renderer.Draw(*m_inst_VAO, *m_inst_IndexBuffer, *m_inst_Shader);
+        }
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    Timer::Timer(int* digit_array, int size) : m_Proj(glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f)),
+                                               m_View(glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0))),
+                                               m_Translation(0, 0, 0), digit_array(digit_array), size(size)
+    {
+        float positions[] = {
+             465.0f - 15 * (size - 2), 355.0f, 0.0f, 0.0f,  // 0
+             495.0f - 15 * (size - 2), 355.0f, 1.0f, 0.0f,  // 1
+             495.0f - 15 * (size - 2), 385.0f, 1.0f, 1.0f,  // 2
+             465.0f - 15 * (size - 2), 385.0f, 0.0f, 1.0f   // 3
+        };
+
+        float positions_header[] = {
+            425.0f, 385.0f, 0.0f, 0.0f,  // 0
+            535.0f, 385.0f, 1.0f, 0.0f,  // 1
+            535.0f, 455.0f, 1.0f, 1.0f,  // 2
+            425.0f, 455.0f, 0.0f, 1.0f   // 3
+        };
+
+        unsigned int indices[] = {
+            0, 1, 2,
+            2, 3, 0
+        };
+
+        GLCall(glEnable(GL_BLEND));
+        GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+
+        m_VAO = std::make_unique<VertexArray>();
+
+        m_VertexBuffer = std::make_unique<VertexBuffer>(positions, 4 * 4 * sizeof(float));
+        m_header_VertexBuffer = std::make_unique<VertexBuffer>(positions_header, 4 * 4 * sizeof(float));
+
+        VertexBufferLayout layout;
+        layout.Push<float>(2);
+        layout.Push<float>(2);
+
+        m_VAO->AddBuffer(*m_VertexBuffer, layout);
+        m_IndexBuffer = std::make_unique<IndexBuffer>(indices, 6);
+
+        m_header_VAO = std::make_unique<VertexArray>();
+        m_header_VAO->AddBuffer(*m_header_VertexBuffer, layout);
+
+        m_Shader = std::make_unique<Shader>("res/shaders/Basic.shader");
+        m_Shader->Bind();
+
+        m_Shader->SetUniform1i("u_Texture", 0);
+    }
+
+    Timer::~Timer()
+    {
+    }
+
+    void Timer::OnUpdate(float deltaTime)
+    {
+    }
+
+    void Timer::OnRender()
+    {
+        Renderer renderer;
+
+        m_Texture = std::make_unique<Texture>("res/textures/Timesurvived.png");
+        m_Texture->Bind();
+
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
+        glm::mat4 mvp = m_Proj * m_View * model;
+        m_Shader->Bind();
+        m_Shader->SetUniformMat4f("u_MVP", mvp);
+        renderer.Draw(*m_header_VAO, *m_IndexBuffer, *m_Shader);
+
+
+        for(int i = 0; i < size; i++)
+        {
+            if (i == size - 2)
+            {
+                m_Translation.x = (float)((i - 1) * 15 + 9);
+                m_Texture = std::make_unique<Texture>("res/textures/digits/point.png");
+                m_Texture->Bind();
+
+                glm::mat4 model = glm::translate(glm::mat4(1.0f), m_Translation);
+                glm::mat4 mvp = m_Proj * m_View * model;
+                m_Shader->Bind();
+                m_Shader->SetUniformMat4f("u_MVP", mvp);
+                renderer.Draw(*m_VAO, *m_IndexBuffer, *m_Shader);
+            }
+
+            m_Translation.x = (float)(i * 15);
+
+            if (i == size - 2)
+                m_Translation.x += 5;
+
+
+            switch (digit_array[i])
+            {
+            case 0: m_Texture = std::make_unique<Texture>("res/textures/digits/0.png"); break;
+            case 1: m_Texture = std::make_unique<Texture>("res/textures/digits/1.png"); break;
+            case 2: m_Texture = std::make_unique<Texture>("res/textures/digits/2.png"); break;
+            case 3: m_Texture = std::make_unique<Texture>("res/textures/digits/3.png"); break;
+            case 4: m_Texture = std::make_unique<Texture>("res/textures/digits/4.png"); break;
+            case 5: m_Texture = std::make_unique<Texture>("res/textures/digits/5.png"); break;
+            case 6: m_Texture = std::make_unique<Texture>("res/textures/digits/6.png"); break;
+            case 7: m_Texture = std::make_unique<Texture>("res/textures/digits/7.png"); break;
+            case 8: m_Texture = std::make_unique<Texture>("res/textures/digits/8.png"); break;
+            case 9: m_Texture = std::make_unique<Texture>("res/textures/digits/9.png"); break;
+            }
+            m_Texture->Bind();
+
+            glm::mat4 model = glm::translate(glm::mat4(1.0f), m_Translation);
+            glm::mat4 mvp = m_Proj * m_View * model;
+            m_Shader->Bind();
+            m_Shader->SetUniformMat4f("u_MVP", mvp);
+            renderer.Draw(*m_VAO, *m_IndexBuffer, *m_Shader);
         }
 
     }

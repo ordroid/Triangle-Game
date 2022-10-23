@@ -85,7 +85,7 @@ int main(void)
 
         handler::Instructions* instructions = new handler::Instructions();
 
-        handler::Triangle* handler = new handler::Triangle();
+        handler::Triangle* triangle = new handler::Triangle();
         bool shoot = false;
         int exists = 0;
         bool rendered_first = false;
@@ -110,13 +110,16 @@ int main(void)
 
         long long current_speed = 3;
 
-        bool* already_shot = new bool[sizeof(bool) * handler->num_enemies];
-        for (int i = 0; i < handler->num_enemies; i++)
+        bool* already_shot = new bool[sizeof(bool) * triangle->num_enemies];
+        for (int i = 0; i < triangle->num_enemies; i++)
             already_shot[i] = false;
 
-        bool* enemy_shown = new bool[sizeof(bool) * handler->num_enemies];
-        for (int i = 0; i < handler->num_enemies; i++)
+        bool* enemy_shown = new bool[sizeof(bool) * triangle->num_enemies];
+        for (int i = 0; i < triangle->num_enemies; i++)
             enemy_shown[i] = false;
+
+        int* digit_array = nullptr;
+        handler::Timer* timer = nullptr;
 
         int loop_instructions = 0;
         auto start_time = std::chrono::system_clock::now();
@@ -136,7 +139,7 @@ int main(void)
 
             if (!instructions->OnKeyPress(enter_pressed))
             {
-                handler->OnRender();
+                triangle->OnRender();
                 instructions->OnRender();
                 start_time = std::chrono::system_clock::now();
             }
@@ -148,13 +151,15 @@ int main(void)
                     start_game = false;
                     end_game = false;
 
-                    delete handler;
+                    delete triangle;
                     delete lvl;
                     delete gameover;
+                    delete timer;
+                    timer = nullptr;
                     delete[] already_shot;
                     delete[] enemy_shown;
 
-                    handler = new handler::Triangle();
+                    triangle = new handler::Triangle();
                     shoot = false;
                     exists = 0;
                     rendered_first = false;
@@ -180,12 +185,12 @@ int main(void)
 
                     current_speed = 3;
 
-                    already_shot = new bool[sizeof(bool) * handler->num_enemies];
-                    for (int i = 0; i < handler->num_enemies; i++)
+                    already_shot = new bool[sizeof(bool) * triangle->num_enemies];
+                    for (int i = 0; i < triangle->num_enemies; i++)
                         already_shot[i] = false;
 
-                    enemy_shown = new bool[sizeof(bool) * handler->num_enemies];
-                    for (int i = 0; i < handler->num_enemies; i++)
+                    enemy_shown = new bool[sizeof(bool) * triangle->num_enemies];
+                    for (int i = 0; i < triangle->num_enemies; i++)
                         enemy_shown[i] = false;
 
                     loop_instructions = 0;
@@ -196,17 +201,17 @@ int main(void)
                     start = std::chrono::system_clock::now();
                 }
 
-                handler->OnRender();
+                triangle->OnRender();
 
                 glfwSetKeyCallback(window, key_callback);
 
-                shoot = handler->OnKeyPress(up_pressed, left_pressed, right_pressed, down_pressed, q_pressed, e_pressed, space_pressed);
+                shoot = triangle->OnKeyPress(up_pressed, left_pressed, right_pressed, down_pressed, q_pressed, e_pressed, space_pressed);
                 
-                if (shoot && exists  == 0)
+                if (shoot && exists  < 2)
                 {
-                    bullets[0 + shooting] = new handler::Bullet(handler);
-                    bullets[1 + shooting] = new handler::Bullet(handler, 120.0f);
-                    bullets[2 + shooting] = new handler::Bullet(handler, 240.0f);
+                    bullets[0 + shooting] = new handler::Bullet(triangle);
+                    bullets[1 + shooting] = new handler::Bullet(triangle, 120.0f);
+                    bullets[2 + shooting] = new handler::Bullet(triangle, 240.0f);
 
                     start = std::chrono::system_clock::now();
 
@@ -218,29 +223,6 @@ int main(void)
                         rendered_second = false;
 
                     shooting = 3 - shooting;
-                }
-                else if (shoot && exists == 1)
-                {
-                    auto time_second_shot = std::chrono::system_clock::now();
-                    std::chrono::duration<double> time_from_first_show = time_second_shot - start;
-
-                    if (time_from_first_show.count() >= 0.3)
-                    {
-                        bullets[0 + shooting] = new handler::Bullet(handler);
-                        bullets[1 + shooting] = new handler::Bullet(handler, 120.0f);
-                        bullets[2 + shooting] = new handler::Bullet(handler, 240.0f);
-
-                        start = std::chrono::system_clock::now();
-
-                        exists++;
-
-                        if (shooting == 0)
-                            rendered_first = false;
-                        else
-                            rendered_second = false;
-
-                        shooting = 3 - shooting;
-                    }
                 }
                 else
                 {
@@ -319,28 +301,28 @@ int main(void)
                 std::chrono::duration<double> elapsed_time = current_time - last_enemy;
                 if (elapsed_time.count() > 0.3)
                 {
-                    for (int i = 0; i < handler->num_enemies; i++)
+                    for (int i = 0; i < triangle->num_enemies; i++)
                     {
-                        if (!handler->enemies[i] && !already_shot[i])
+                        if (!triangle->enemies[i] && !already_shot[i])
                         {
                             already_shot[i] = true;
-                            handler->enemies[i] = new handler::Enemy(current_speed);
-                            handler->enemies[i]->OnRender();
+                            triangle->enemies[i] = new handler::Enemy(current_speed);
+                            triangle->enemies[i]->OnRender();
                             last_enemy = std::chrono::system_clock::now();
                             break;
                         }
 
-                        if (i == handler->num_enemies - 1)
+                        if (i == triangle->num_enemies - 1)
                         {
                             lvl = new handler::Levelup();
                             lvl->OnRender();
                             show_lvlup = true;
                             show_count = 0;
 
-                            for (int j = 0; j < handler->num_enemies; j++)
+                            for (int j = 0; j < triangle->num_enemies; j++)
                             {
-                                delete handler->enemies[j];
-                                handler->enemies[j] = nullptr;
+                                delete triangle->enemies[j];
+                                triangle->enemies[j] = nullptr;
                                 already_shot[j] = false;
                             }
                             current_speed += 2;
@@ -348,34 +330,34 @@ int main(void)
                     }
                 }
 
-                for (int i = 0; i < handler->num_enemies; i++)
+                for (int i = 0; i < triangle->num_enemies; i++)
                 {
-                    if (handler->enemies[i])
+                    if (triangle->enemies[i])
                     {
-                        handler->enemies[i]->OnUpdate(0.0f);
+                        triangle->enemies[i]->OnUpdate(0.0f);
 
                         if (enemy_shown[i])
                         {
-                            if (handler->enemies[i]->getVert1x() > 960
-                                || handler->enemies[i]->getVert2x() < 0
-                                || handler->enemies[i]->getVert1y() > 540
-                                || handler->enemies[i]->getVert3y() < 0)
+                            if (triangle->enemies[i]->getVert1x() > 960
+                                || triangle->enemies[i]->getVert2x() < 0
+                                || triangle->enemies[i]->getVert1y() > 540
+                                || triangle->enemies[i]->getVert3y() < 0)
                             { // out of window
-                                delete handler->enemies[i];
-                                handler->enemies[i] = nullptr;
+                                delete triangle->enemies[i];
+                                triangle->enemies[i] = nullptr;
                                 enemy_shown[i] = false;
                             }
                         }
                         else
                         {
-                            if (((handler->enemies[i]->getVert1x() > 0) && (handler->enemies[i]->getVert1x() < 960))
-                                && ((handler->enemies[i]->getVert1y() > 0) && (handler->enemies[i]->getVert1y() < 540)))
+                            if (((triangle->enemies[i]->getVert1x() > 0) && (triangle->enemies[i]->getVert1x() < 960))
+                                && ((triangle->enemies[i]->getVert1y() > 0) && (triangle->enemies[i]->getVert1y() < 540)))
                                 enemy_shown[i] = true;
                         }
                     }
                 }
 
-                check_collisions(handler, bullets);
+                check_collisions(triangle, bullets);
             }
 
             if (end_game)
@@ -384,30 +366,68 @@ int main(void)
                 {
                     end_time = std::chrono::system_clock::now();
                     gameover = new handler::Gameover();
-                    handler->OnBurn();
-                    handler->enemies[killer]->OnBurn();
-                    handler->enemies[killer]->stopMotion();
+                    triangle->OnBurn();
+                    triangle->enemies[killer]->OnBurn();
+                    triangle->enemies[killer]->stopMotion();
                     just_ended = false;
                 }
 
                 if (ended_two_seconds_ago)
                 {
                     gameover->OnRender();
+                    if(timer)
+                        timer->OnRender();
                 }
                 else
                 {
-                    handler->OnRender();
-                    handler->enemies[killer]->OnUpdate(0.0f);
+                    triangle->OnRender();
+                    triangle->enemies[killer]->OnUpdate(0.0f);
                     auto now_burning = std::chrono::system_clock::now();
                     std::chrono::duration<double> burning_time = now_burning - end_time;
                     if (burning_time.count() >= 2)
                         ended_two_seconds_ago = true;
+                    if(timer)
+                        timer->OnRender();
                 }
 
                 std::chrono::duration<double> game_time = end_time - start_time;
 
-                std::cout << "GAME OVER!\nGame time: " << game_time.count() << std::endl;
+                //std::cout << "GAME OVER!\nGame time: " << game_time.count() << std::endl;
+
+                int num_of_seconds = (int)game_time.count();
+                int num_of_milliseconds = (int)((game_time.count() - num_of_seconds) * 100);
+                std::cout << "GAME TIME: " << num_of_seconds << "." << num_of_milliseconds << std::endl;
                 
+                int num_of_seconds_copy = num_of_seconds;
+                int num_of_seconds_digits = 1;
+                while (num_of_seconds_copy /= 10)
+                {
+                    num_of_seconds_digits++;
+                }
+
+                int* digit_array = new int[num_of_seconds_digits + 2]; // { second1, (optional)second2, ... , millisecond1, millisecond2 }
+                for (int i = 0; i < num_of_seconds_digits; i++)
+                {
+                    digit_array[i] = num_of_seconds % 10;
+                    num_of_seconds /= 10;
+                }
+
+                for (int i = 0; i < (int)(num_of_seconds_digits / 2); i++)
+                {
+                    int holder = digit_array[i];
+                    digit_array[i] = digit_array[num_of_seconds_digits - 1 - i];
+                    digit_array[num_of_seconds_digits - 1 - i] = holder;
+                }
+
+                digit_array[num_of_seconds_digits + 1] = num_of_milliseconds % 10;
+                num_of_milliseconds /= 10;
+                digit_array[num_of_seconds_digits] = num_of_milliseconds;
+
+                // now digit_array is initialized properly
+
+                timer = new handler::Timer(digit_array, num_of_seconds_digits + 2);
+
+
 
                 glfwSetKeyCallback(window, key_callback);
 
@@ -447,10 +467,16 @@ int main(void)
         if (gameover)
             delete gameover;
 
-        for (int i = 0; i < handler->num_enemies; i++)
+        if (timer)
+            delete timer;
+        
+        if (digit_array)
+            delete digit_array;
+
+        for (int i = 0; i < triangle->num_enemies; i++)
         {
-            if (handler->enemies[i])
-                delete handler->enemies[i];
+            if (triangle->enemies[i])
+                delete triangle->enemies[i];
         }
 
         if (already_shot)
@@ -460,9 +486,8 @@ int main(void)
         if (enemy_shown)
             delete[] enemy_shown;
 
-        if (handler)
-            delete handler;
-
+        if (triangle)
+            delete triangle;
 
     }
 
