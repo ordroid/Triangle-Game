@@ -391,7 +391,7 @@ int main(void)
                 }
 
                 std::chrono::duration<double> game_time = end_time - start_time;
-
+                
                 //std::cout << "GAME OVER!\nGame time: " << game_time.count() << std::endl;
 
                 int num_of_seconds = (int)game_time.count();

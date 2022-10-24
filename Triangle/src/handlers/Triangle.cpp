@@ -790,10 +790,10 @@ namespace handler {
                                                m_Translation(0, 0, 0), digit_array(digit_array), size(size)
     {
         float positions[] = {
-             465.0f - 15 * (size - 2), 355.0f, 0.0f, 0.0f,  // 0
-             495.0f - 15 * (size - 2), 355.0f, 1.0f, 0.0f,  // 1
-             495.0f - 15 * (size - 2), 385.0f, 1.0f, 1.0f,  // 2
-             465.0f - 15 * (size - 2), 385.0f, 0.0f, 1.0f   // 3
+             465.0f - 15 * ((size - 1) / 2), 355.0f, 0.0f, 0.0f,  // 0
+             495.0f - 15 * ((size - 1) / 2), 355.0f, 1.0f, 0.0f,  // 1
+             495.0f - 15 * ((size - 1) / 2), 385.0f, 1.0f, 1.0f,  // 2
+             465.0f - 15 * ((size - 1) / 2), 385.0f, 0.0f, 1.0f   // 3
         };
 
         float positions_header[] = {
