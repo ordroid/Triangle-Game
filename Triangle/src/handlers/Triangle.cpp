@@ -871,7 +871,7 @@ namespace handler {
 
             m_Translation.x = (float)(i * 15);
 
-            if (i == size - 2)
+            if (i >= size - 2)
                 m_Translation.x += 5;
 
 
