@@ -45,6 +45,7 @@ bool start_game = false;
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void instructions_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void check_collisions(handler::Triangle* triangle, handler::Bullet* bullets[]);
+bool collision(float enemy_vertices[4][2], float bullet_vertices[3][2]);
 
 int main(void)
 {
@@ -640,42 +641,8 @@ void check_collisions(handler::Triangle* triangle, handler::Bullet* bullets[])
                                        {enemies[i]->getVert4x(), enemies[i]->getVert4y()} };
 
 
-        if ((((enemy_vertices[0][0] <= bullet0_vertices[0][0] && bullet0_vertices[0][0] <= enemy_vertices[1][0])
-            || (enemy_vertices[0][0] <= bullet0_vertices[1][0] && bullet0_vertices[1][0] <= enemy_vertices[1][0])
-            || (enemy_vertices[0][0] <= bullet0_vertices[2][0] && bullet0_vertices[2][0] <= enemy_vertices[1][0]))
-            && ((enemy_vertices[1][1] <= bullet0_vertices[0][1] && bullet0_vertices[0][1] <= enemy_vertices[2][1])
-            || (enemy_vertices[1][1] <= bullet0_vertices[1][1] && bullet0_vertices[1][1] <= enemy_vertices[2][1])
-            || (enemy_vertices[1][1] <= bullet0_vertices[2][1] && bullet0_vertices[2][1] <= enemy_vertices[2][1])))
-            || (((enemy_vertices[0][0] <= bullet1_vertices[0][0] && bullet1_vertices[0][0] <= enemy_vertices[1][0])
-            || (enemy_vertices[0][0] <= bullet1_vertices[1][0] && bullet1_vertices[1][0] <= enemy_vertices[1][0])
-            || (enemy_vertices[0][0] <= bullet1_vertices[2][0] && bullet1_vertices[2][0] <= enemy_vertices[1][0]))
-            && ((enemy_vertices[1][1] <= bullet1_vertices[0][1] && bullet1_vertices[0][1] <= enemy_vertices[2][1])
-            || (enemy_vertices[1][1] <= bullet1_vertices[1][1] && bullet1_vertices[1][1] <= enemy_vertices[2][1])
-            || (enemy_vertices[1][1] <= bullet1_vertices[2][1] && bullet1_vertices[2][1] <= enemy_vertices[2][1])))
-            || (((enemy_vertices[0][0] <= bullet2_vertices[0][0] && bullet2_vertices[0][0] <= enemy_vertices[1][0])
-            || (enemy_vertices[0][0] <= bullet2_vertices[1][0] && bullet2_vertices[1][0] <= enemy_vertices[1][0])
-            || (enemy_vertices[0][0] <= bullet2_vertices[2][0] && bullet2_vertices[2][0] <= enemy_vertices[1][0]))
-            && ((enemy_vertices[1][1] <= bullet2_vertices[0][1] && bullet2_vertices[0][1] <= enemy_vertices[2][1])
-            || (enemy_vertices[1][1] <= bullet2_vertices[1][1] && bullet2_vertices[1][1] <= enemy_vertices[2][1])
-            || (enemy_vertices[1][1] <= bullet2_vertices[2][1] && bullet2_vertices[2][1] <= enemy_vertices[2][1])))
-            || (((enemy_vertices[0][0] <= bullet3_vertices[0][0] && bullet3_vertices[0][0] <= enemy_vertices[1][0])
-            || (enemy_vertices[0][0] <= bullet3_vertices[1][0] && bullet3_vertices[1][0] <= enemy_vertices[1][0])
-            || (enemy_vertices[0][0] <= bullet3_vertices[2][0] && bullet3_vertices[2][0] <= enemy_vertices[1][0]))
-            && ((enemy_vertices[1][1] <= bullet3_vertices[0][1] && bullet3_vertices[0][1] <= enemy_vertices[2][1])
-            || (enemy_vertices[1][1] <= bullet3_vertices[1][1] && bullet3_vertices[1][1] <= enemy_vertices[2][1])
-            || (enemy_vertices[1][1] <= bullet3_vertices[2][1] && bullet3_vertices[2][1] <= enemy_vertices[2][1])))
-            || (((enemy_vertices[0][0] <= bullet4_vertices[0][0] && bullet4_vertices[0][0] <= enemy_vertices[1][0])
-            || (enemy_vertices[0][0] <= bullet4_vertices[1][0] && bullet4_vertices[1][0] <= enemy_vertices[1][0])
-            || (enemy_vertices[0][0] <= bullet4_vertices[2][0] && bullet4_vertices[2][0] <= enemy_vertices[1][0]))
-            && ((enemy_vertices[1][1] <= bullet4_vertices[0][1] && bullet4_vertices[0][1] <= enemy_vertices[2][1])
-            || (enemy_vertices[1][1] <= bullet4_vertices[1][1] && bullet4_vertices[1][1] <= enemy_vertices[2][1])
-            || (enemy_vertices[1][1] <= bullet4_vertices[2][1] && bullet4_vertices[2][1] <= enemy_vertices[2][1])))
-            || (((enemy_vertices[0][0] <= bullet5_vertices[0][0] && bullet5_vertices[0][0] <= enemy_vertices[1][0])
-            || (enemy_vertices[0][0] <= bullet5_vertices[1][0] && bullet5_vertices[1][0] <= enemy_vertices[1][0])
-            || (enemy_vertices[0][0] <= bullet5_vertices[2][0] && bullet5_vertices[2][0] <= enemy_vertices[1][0]))
-            && ((enemy_vertices[1][1] <= bullet5_vertices[0][1] && bullet5_vertices[0][1] <= enemy_vertices[2][1])
-            || (enemy_vertices[1][1] <= bullet5_vertices[1][1] && bullet5_vertices[1][1] <= enemy_vertices[2][1])
-            || (enemy_vertices[1][1] <= bullet5_vertices[2][1] && bullet5_vertices[2][1] <= enemy_vertices[2][1]))))
+        if (collision(enemy_vertices, bullet0_vertices) || collision(enemy_vertices, bullet1_vertices) || collision(enemy_vertices, bullet2_vertices)
+            || collision(enemy_vertices, bullet3_vertices) || collision(enemy_vertices, bullet4_vertices) || collision(enemy_vertices, bullet5_vertices))
         {
             delete enemies[i];
             enemies[i] = nullptr;
@@ -726,4 +693,15 @@ void check_collisions(handler::Triangle* triangle, handler::Bullet* bullets[])
             return;          
         }
     }
+}
+
+bool collision(float enemy_vertices[4][2], float bullet_vertices[3][2]) {
+    if(((enemy_vertices[0][0] <= bullet_vertices[0][0] && bullet_vertices[0][0] <= enemy_vertices[1][0])
+        || (enemy_vertices[0][0] <= bullet_vertices[1][0] && bullet_vertices[1][0] <= enemy_vertices[1][0])
+        || (enemy_vertices[0][0] <= bullet_vertices[2][0] && bullet_vertices[2][0] <= enemy_vertices[1][0]))
+        && ((enemy_vertices[1][1] <= bullet_vertices[0][1] && bullet_vertices[0][1] <= enemy_vertices[2][1])
+        || (enemy_vertices[1][1] <= bullet_vertices[1][1] && bullet_vertices[1][1] <= enemy_vertices[2][1])
+        || (enemy_vertices[1][1] <= bullet_vertices[2][1] && bullet_vertices[2][1] <= enemy_vertices[2][1])))
+        return true;
+    return false;
 }
