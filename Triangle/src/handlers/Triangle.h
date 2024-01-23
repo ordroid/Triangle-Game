@@ -7,6 +7,7 @@
 #include "Texture.h"
 
 #include <memory>
+#include <time.h>
 
 #define ENEMIES 100
 
