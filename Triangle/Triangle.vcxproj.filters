@@ -495,6 +495,9 @@
     <Image Include="res\icon\Triangle.ico">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="res\textures\digits\point.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\vendor\stb_image\stb_image.cpp">

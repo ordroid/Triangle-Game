@@ -287,6 +287,7 @@
     <Image Include="res\textures\digits\7.png" />
     <Image Include="res\textures\digits\8.png" />
     <Image Include="res\textures\digits\9.png" />
+    <Image Include="res\textures\digits\point.png" />
     <Image Include="res\textures\Enemy.png" />
     <Image Include="res\textures\EnemyBurning.png" />
     <Image Include="res\textures\Gameover.jpg" />
