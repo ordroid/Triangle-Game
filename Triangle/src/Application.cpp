@@ -91,6 +91,8 @@ int main(void)
         int exists = 0;
         bool rendered_first = false;
         bool rendered_second = false;
+        srand((unsigned int)time(NULL)); // used in Triangle.cpp -> Enemy constructor
+
 
         handler::Bullet* bullets[6]{};
         for (int i = 0; i < 6; i++)
