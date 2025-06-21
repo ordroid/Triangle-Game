@@ -1,6 +1,6 @@
 import os
 import subprocess
-import openai
+import openai import OpenAI
 
 DOC_PATH = "docs/docAid.md"
 NO_DIFF = "NO_DIFF"
@@ -34,9 +34,9 @@ else:
     Include diagrams if helpful."""
 
 # Call OpenAI
-openai.api_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 try:
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
         model="gpt-4.1-nano",
         messages=[
             {"role": "system", "content": "You are an expert at generating concise technical documentation."},
