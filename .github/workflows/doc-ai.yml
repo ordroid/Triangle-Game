@@ -12,6 +12,7 @@ on:
 permissions:
   contents: write  # needed to push commits back to the repo
 
+
 jobs:
   generate-docs:
     runs-on: ubuntu-latest
