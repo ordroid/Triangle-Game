@@ -1,6 +1,7 @@
 name: Auto-Doc Generator
 
 on:
+  workflow_dispatch:  # allows manual trigger from GitHub UI
   push:
     paths:
       - '**'
