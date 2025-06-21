@@ -9,6 +9,9 @@ on:
     paths:
       - '**'
 
+permissions:
+  contents: write  # needed to push commits back to the repo
+
 jobs:
   generate-docs:
     runs-on: ubuntu-latest
@@ -28,3 +31,12 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: python .github/scripts/gen_doc.py
+
+      - name: Commit changes
+        run: |
+          git config user.name "doc-bot"
+          git config user.email "doc-bot@ortwmailserver.com"
+          git add docs/docAid.md
+          git commit -m "Update documentation [auto]"
+          git push
+
